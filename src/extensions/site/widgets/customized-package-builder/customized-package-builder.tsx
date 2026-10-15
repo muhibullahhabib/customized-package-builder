@@ -492,8 +492,6 @@
 
 
 
-
-
 // @ts-nocheck
 // Trip builder: Wix site widget (custom element)
 import { SERVICES, PACKAGES, TIER_LABELS, calculate, nightsBetween } from "../../../../components/pricing";
@@ -529,7 +527,7 @@ const tierForBedrooms = (n) => (n >= 13 ? "13+" : n >= 10 ? "10-12" : n >= 7 ? "
 const usd = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
 const CSS = `
-:host{display:block;--bg:#fdfbf7;--card:#ffffff;--cream:#f8f0e0;--line:#e9e1d2;--gold:#b08a4e;--gold-d:#8f6d37;--gold-l:#dcbc80;--text:#1f2127;--mute:#5d6169;
+:host{display:block;position:relative;--bg:#fdfbf7;--card:#ffffff;--cream:#f8f0e0;--line:#e9e1d2;--gold:#b08a4e;--gold-d:#8f6d37;--gold-l:#dcbc80;--text:#1f2127;--mute:#5d6169;
   font-family:'Barlow','Inter',system-ui,sans-serif;font-size:18px;line-height:1.55;color:var(--text);background:var(--bg)}
 *{box-sizing:border-box}
 .wrap>div,.wrap>aside,.row>div,.opt,.villa,.svc .info{min-width:0}
@@ -622,6 +620,13 @@ select:disabled{opacity:.5;cursor:not-allowed}
 .legend dd{margin:0;line-height:1.5}
 #terms h3{font-size:21px;margin:22px 0 8px}
 .tp{color:var(--mute);font-size:17px;line-height:1.65;margin:0 0 10px;max-width:72ch}
+/* Terms: expand / collapse */
+.acc-h2{margin:0 0 8px}
+.acc-btn{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;margin:0;padding:0;background:none;border:0;border-radius:12px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.acc-ic{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--gold);border-radius:50%;color:var(--gold-d);background:#fff;transition:transform .2s,background .15s,color .15s}
+.acc-btn:hover .acc-ic{background:var(--gold);color:#fff}
+.acc-btn[aria-expanded=true] .acc-ic{transform:rotate(180deg)}
+.acc-b[hidden]{display:none}
 .facts{border-bottom:1px solid var(--line);margin-bottom:8px;padding-bottom:6px}
 .facts .ln b,.tot .ln b{white-space:normal;text-align:right}
 .ack{display:flex;gap:12px;align-items:flex-start;margin:22px 0 0;font-size:15px;line-height:1.5;color:var(--text);cursor:pointer}
@@ -630,6 +635,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
 .help a,.note a{color:var(--gold-d)}
 .sent{position:absolute;left:0;top:0;width:1px;height:100%;opacity:0;pointer-events:none}
 .sent i{position:absolute;left:0;width:1px;height:1px}
+.pin{display:none}
 @media(min-width:1001px){aside.native{position:sticky;top:var(--stick,16px);will-change:auto}}
 @media(max-width:1000px){
   .wrap{grid-template-columns:1fr;gap:28px;padding:40px 24px}
@@ -642,35 +648,83 @@ select:disabled{opacity:.5;cursor:not-allowed}
 }
 @media(max-width:720px){
   :host{font-size:17px}
-  .wrap{padding:24px 14px}
+  .wrap{padding:16px 12px;gap:14px}
   .villas,.opts{grid-template-columns:1fr}
-  h1{font-size:36px} h2{font-size:27px}
-  p.sub{font-size:17px}
-  section{padding:22px}
+  .row,.opts,.tiers,.pk{gap:12px}
+  .row{grid-template-columns:1fr 1fr}
+  h1{font-size:36px} h2{font-size:27px;margin-bottom:6px}
+  p.sub{font-size:17px;margin:6px 0 16px}
+  p.eyebrow{margin-bottom:6px}
+  section{padding:20px;margin-bottom:14px}
+  .intro{margin-bottom:16px;padding-bottom:16px}
+  .steps{margin-top:14px}
+  .stepl{margin-top:8px}
+  .villas{margin-top:16px;gap:14px}
+  .exact{margin-top:16px}
+  .legend{margin-top:12px}
+  .note{margin:10px 0}
+  .tp{margin:0 0 8px}
+  #terms h3{margin:16px 0 6px}
+  .contact{margin-top:18px;padding-top:18px;gap:10px}
+  .go{margin-top:18px}
+  .ack{margin-top:16px}
+  .err{margin-top:8px;min-height:0}
+  .help{margin-top:12px}
   input[type=date]{-webkit-appearance:none;appearance:none;text-align:left}
-  aside{padding:24px}
+  aside{padding:20px}
+  aside h2{margin-bottom:10px}
+  .tot{margin-top:8px;padding-top:12px}
 }
 @media(max-width:520px){
-  .wrap{padding:16px 10px;gap:20px}
-  .row{grid-template-columns:1fr}
+  .wrap{padding:12px 10px;gap:12px}
   h1{font-size:32px} h2{font-size:25px}
-  section{padding:18px;border-radius:16px;margin-bottom:18px}
-  .intro{margin-bottom:22px;padding-bottom:20px}
-  .opt{padding:16px;font-size:18px}
-  .tiers .opt{padding:14px 8px;font-size:17px}
-  .villa .ph{height:150px}
-  .svc{gap:12px;padding:16px 0;font-size:18px}
+  section{padding:16px;border-radius:16px;margin-bottom:12px}
+  .intro{margin-bottom:14px;padding-bottom:14px}
+  .opt{padding:14px;font-size:18px}
+  .tiers .opt{padding:12px 8px;font-size:17px}
+  .villa{padding:14px}
+  .villa .ph{height:120px;margin-bottom:10px}
+  .svc{gap:10px;padding:12px 0;font-size:18px}
   .qty{gap:8px}
   .tp{font-size:16px}
-  aside{padding:20px;border-radius:16px}
+  aside{padding:16px;border-radius:16px}
   .dep b{font-size:22px}
-  .ln{font-size:15px}
-  .go{padding:18px;font-size:18px}
+  .ln{font-size:15px;padding:6px 0}
+  .go{padding:16px;font-size:18px}
+  .acc-ic{width:40px;height:40px}
 }
 @media(max-width:360px){
   .tiers{grid-template-columns:1fr}
   .svc{flex-wrap:wrap}
   .svc .qty{margin-left:auto}
+}
+/* Mobile: price pinned to the bottom of the screen (placed last so its bottom padding wins over the rules above) */
+@media(max-width:720px){
+  .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .pin{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,253,248,.97);border-top:2px solid var(--gold);
+    box-shadow:0 -6px 20px rgba(60,45,20,.14);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .pin>div{min-width:0;display:flex;flex-direction:column}
+  .pin>div.d{text-align:right}
+  .pin span{font-size:12px;line-height:1.25;color:var(--mute)}
+  .pin b{font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:22px;line-height:1.2;color:var(--text)}
+  .pin .d b{color:var(--gold-d)}
+}
+/* Mobile: compact "Start with the basics" (2 fields per line) and step-by-step reveal */
+@media(max-width:720px){
+  .basics h2{font-size:22px;margin-bottom:4px}
+  .basics .sub{font-size:15px;line-height:1.5;margin:4px 0 12px}
+  .basics .row{gap:10px}
+  .basics label{font-size:13px;margin-bottom:4px}
+  .basics input:not([type=checkbox]),.basics select{min-width:0;min-height:44px;padding:10px 12px;font-size:15px}
+  .basics select{padding-right:32px;background-position:right 12px center;background-size:11px 7px}
+  .basics input[type=date]{min-height:44px}
+  .wrap[data-rev="1"] [data-step="2"],.wrap[data-rev="1"] [data-step="3"],.wrap[data-rev="2"] [data-step="3"]{display:none}
+  section{scroll-margin-top:8px}
+}
+@media(max-width:360px){
+  .basics input:not([type=checkbox]),.basics select{font-size:14px;padding-left:10px;padding-right:10px}
+  .basics select{padding-right:28px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}`;
 
@@ -680,6 +734,7 @@ class TripBuilder extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.s = { mode: "stay", destination: "", checkIn: "", checkOut: "", guests: "", tier: "4-6", exactBedrooms: "",
       ranks: {}, package: null, services: {} };
+    this._rev = 1; // furthest step shown on mobile (1 to 3)
   }
 
   connectedCallback() {
@@ -704,7 +759,9 @@ class TripBuilder extends HTMLElement {
                     events, once per frame, using exact positions.
      3) "observe" : widget is inside an iframe (page scroll happens outside it, so scroll events never fire).
                     IntersectionObserver markers tell us which part is visible, and the panel glides to it
-                    with easing so there is no stepping or shaking. */
+                    with easing so there is no stepping or shaking.
+     On mobile the pinned price bar uses position:fixed; inside an iframe ("observe") it is placed at the
+     bottom of the visible band using the same markers. */
   setupSticky() {
     this._mode = IS_FRAMED ? "observe" : "native";
     this._stickAt = STICKY_TOP; this._cur = 0; this._target = 0; this._bad = 0; this._band = 0; this._fitBand = 0;
@@ -768,9 +825,28 @@ class TripBuilder extends HTMLElement {
     aside.style.setProperty("--stick", this._stickAt + "px");
   }
 
+  // Mobile pinned price bar. On the normal page CSS position:fixed does everything.
+  // Inside an iframe the bar is placed at the bottom of the part of the widget that is on screen.
+  positionPin() {
+    const pin = this.shadowRoot.querySelector(".pin");
+    if (!pin) return;
+    const framedMobile = this._mode === "observe" && window.innerWidth <= 720 && this._vis && this._vis.size > 0;
+    if (!framedMobile) {
+      if (pin.style.position) { pin.style.position = ""; pin.style.top = ""; pin.style.bottom = ""; pin.style.transition = ""; }
+      return;
+    }
+    const maxI = Math.max(...this._vis);
+    const bottom = Math.min((maxI + 1) * STEP, this.offsetHeight || Infinity);
+    pin.style.position = "absolute";
+    pin.style.bottom = "auto";
+    if (!REDUCED) pin.style.transition = "top .12s ease-out";
+    pin.style.top = Math.max(0, bottom - pin.offsetHeight) + "px";
+  }
+
   positionSummary() {
     const aside = this.shadowRoot.querySelector("aside"), wrap = this.shadowRoot.querySelector(".wrap");
     if (!aside || !wrap || !this._mode) return;
+    this.positionPin();
     if (window.innerWidth <= 1000) { aside.style.transform = ""; aside.classList.remove("tight"); this._cur = this._target = 0; return; } // single column
     if (this._mode === "observe") this.observePosition();
     else if (this._mode === "scroll") this.scrollPosition();
@@ -842,6 +918,23 @@ class TripBuilder extends HTMLElement {
     if (aside) aside.style.transform = `translate3d(0, ${Math.round(this._cur)}px, 0)`;
   }
 
+  // Terms section: expand / collapse the full terms and the acknowledgment text.
+  setTerms(open) {
+    const btn = this.shadowRoot.querySelector("#termsBtn"), body = this.shadowRoot.querySelector("#termsBody");
+    if (!btn || !body) return;
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    body.hidden = !open;
+    requestAnimationFrame(() => { this.fitPanel(); this.positionSummary(); });
+  }
+
+  // Brings the newly shown step 2 into view so the guest does not have to scroll to find it.
+  revealStep2() {
+    requestAnimationFrame(() => {
+      const el = this.shadowRoot.querySelector("#modeSec");
+      if (el) el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+    });
+  }
+
   build() {
     const dest = Object.entries(DESTINATIONS).map(([k, d]) => `<option value="${k}">${d.name}</option>`).join("");
     const tiers = Object.entries(TIER_LABELS).map(([k, l]) => `<button class="opt tier" data-tier="${k}">${l}</button>`).join("");
@@ -855,12 +948,12 @@ class TripBuilder extends HTMLElement {
     const more = MORE_SERVICES_URL ? `<p class="note"><a href="${MORE_SERVICES_URL}" target="_top">More experiences: explore all services</a></p>` : "";
 
     this.shadowRoot.innerHTML = `<style>${CSS}</style>
-    <div class="wrap"><div>
+    <div class="wrap" data-rev="1"><div>
       <div class="intro"><p class="eyebrow">Plan your trip</p><h1>Build your <em>getaway</em></h1>
       <p class="sub">Choose your stay, then make the trip yours with the services you want.</p>
       <div class="steps" id="steps"><i></i><i></i><i></i></div><p class="stepl" id="stepl"></p></div>
 
-      <section><h2>Start with the basics</h2>
+      <section class="basics" data-step="1"><h2>Start with the basics</h2>
         <p class="sub">We'll use these details to build your trip options.</p>
         <div class="row">
           <div><label for="dest">Destination</label><select id="dest"><option value="">Choose</option>${dest}</select></div>
@@ -869,28 +962,32 @@ class TripBuilder extends HTMLElement {
           <div><label for="gs">Group size</label><input id="gs" type="number" min="1" inputmode="numeric" placeholder="Guests"></div>
         </div></section>
 
-      <section><h2>How would you like to build your trip?</h2>
+      <section id="modeSec" data-step="2"><h2>How would you like to build your trip?</h2>
         <p class="sub">Choose a stay with experiences, or book services only.</p>
         <div class="opts">
           <button class="opt mode on" data-mode="stay">Stay + experiences<small>Choose a villa, then select a package or customize.</small></button>
           <button class="opt mode" data-mode="services">Services only<small>Skip accommodation and build a service itinerary.</small></button>
         </div></section>
 
-      <section id="stay"><h2>Choose your accommodation</h2>
+      <section id="stay" data-step="2"><h2>Choose your accommodation</h2>
         <p class="sub">Pick a bedroom tier, then rank your first and second villa preferences. We'll confirm availability for your dates and assign the best available match from your preferences.</p>
         <div class="tiers">${tiers}</div>
         <div class="exact"><label for="br">Exact bedroom count (optional)</label><input id="br" type="number" min="1" inputmode="numeric" placeholder="For example, 5"><small>Enter a specific number if you know what you need.</small></div>
         <details class="legend"><summary>What do the stars mean?</summary><dl>${legend}</dl></details>
         <div class="villas" id="villas"></div></section>
 
-      <section id="pkgs"><h2>Pick a package</h2><p class="sub">Or build your own from the services below.</p><div class="pk">${pk}</div></section>
+      <section id="pkgs" data-step="2"><h2>Pick a package</h2><p class="sub">Or build your own from the services below.</p><div class="pk">${pk}</div></section>
 
-      <section><h2>Build your own</h2><p class="sub">Add services; the price updates based on each service's pricing. Services already in your package are not charged twice.</p>${svc}${more}</section>
+      <section data-step="2"><h2>Build your own</h2><p class="sub">Add services; the price updates based on each service's pricing. Services already in your package are not charged twice.</p>${svc}${more}</section>
 
-      <section id="terms"><h2>${TERMS_TITLE}</h2><p class="sub">${TERMS_INTRO}</p>${terms}</section>
+      <section id="terms" data-step="3">
+        <h2 class="acc-h2"><button type="button" class="acc-btn" id="termsBtn" aria-expanded="false" aria-controls="termsBody"><span>${TERMS_TITLE}</span><span class="acc-ic" aria-hidden="true"><svg width="16" height="10" viewBox="0 0 14 9"><path d="M1 1.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h2>
+        <p class="sub">${TERMS_INTRO}</p>
+        <div class="acc-b" id="termsBody" hidden>${terms}<h3>Acknowledgment</h3><p class="tp">${ACK_TEXT}</p></div>
+      </section>
     </div>
 
-    <aside><h2>Your trip summary</h2>
+    <aside data-step="3"><h2>Your trip summary</h2>
       <div class="facts" id="facts"></div><div id="lines"></div>
       <div class="tot"><div class="ln"><span id="lblTotal">Estimated trip total</span><b id="total">$0</b></div>
         <div class="ln dep"><span id="lblDep">Provisional deposit due now</span><b id="dep">$0</b></div>
@@ -903,7 +1000,9 @@ class TripBuilder extends HTMLElement {
       <a class="more" id="toTerms" href="#terms">Read the full terms</a>
       <button class="go" id="go">Pay Provisional Deposit</button><div class="err" id="err" role="alert"></div>
       <p class="help">Need help? <a href="${HELP_LINK}" target="_top">Talk to a trip planner</a></p>
-    </aside></div>`;
+    </aside></div>
+    <div class="pin" id="pin"><div><span id="pinLblTotal">Estimated trip total</span><b id="pinTotal">$0</b></div>
+      <div class="d"><span id="pinLblDep">Provisional deposit due now</span><b id="pinDep">$0</b></div></div>`;
 
     const $ = (q) => this.shadowRoot.querySelector(q);
     const $$ = (q) => this.shadowRoot.querySelectorAll(q);
@@ -911,7 +1010,13 @@ class TripBuilder extends HTMLElement {
     $("#dest").onchange = (e) => { this.s.destination = e.target.value; this.s.ranks = {}; this.renderVillas(); this.refresh(); };
     $("#in").onchange = (e) => { this.s.checkIn = e.target.value; if (e.target.value) $("#out").min = addDays(e.target.value, 1); this.refresh(); };
     $("#out").onchange = (e) => { this.s.checkOut = e.target.value; this.refresh(); };
-    $("#gs").oninput = (e) => { this.s.guests = e.target.value; this.renderVillas(); this.refresh(); };
+    $("#gs").oninput = (e) => {
+      this.s.guests = e.target.value; this.renderVillas();
+      this._hold = true; clearTimeout(this._holdT); // do not move to the next step while the number is still being typed
+      this._holdT = setTimeout(() => { this._hold = false; this.refresh(); }, 900);
+      this.refresh();
+    };
+    $("#gs").onchange = () => { clearTimeout(this._holdT); this._hold = false; this.refresh(); };
     $("#br").oninput = (e) => {
       this.s.exactBedrooms = e.target.value;
       const t = tierForBedrooms(Math.floor(Number(e.target.value)));
@@ -929,7 +1034,8 @@ class TripBuilder extends HTMLElement {
     })));
     ["#nm", "#em", "#ph"].forEach((q) => ($(q).oninput = () => this.refresh()));
     $("#ack").onchange = () => this.refresh();
-    $("#toTerms").onclick = (e) => { e.preventDefault(); $("#terms").scrollIntoView({ behavior: "smooth", block: "start" }); };
+    $("#termsBtn").onclick = () => this.setTerms($("#termsBtn").getAttribute("aria-expanded") !== "true");
+    $("#toTerms").onclick = (e) => { e.preventDefault(); this.setTerms(true); $("#terms").scrollIntoView({ behavior: "smooth", block: "start" }); };
     $("#go").onclick = () => this.submit();
   }
 
@@ -1008,6 +1114,12 @@ class TripBuilder extends HTMLElement {
     $("#bal").textContent = usd(c.balance);
     $("#due").textContent = c.policy === "within-window" ? "Stated before final confirmation" : c.balanceDueDate ? fmtDate(c.balanceDueDate) : "—";
 
+    // mobile pinned price bar mirrors the summary totals
+    $("#pinLblTotal").textContent = $("#lblTotal").textContent;
+    $("#pinLblDep").textContent = $("#lblDep").textContent;
+    $("#pinTotal").textContent = $("#total").textContent;
+    $("#pinDep").textContent = $("#dep").textContent;
+
     const base = "This is an estimate. You are paying a provisional deposit, and your villa is not confirmed until we verify availability and you approve your final invoice.";
     $("#note").innerHTML = {
       standard: base + " The balance is due 30 days before arrival.",
@@ -1024,6 +1136,13 @@ class TripBuilder extends HTMLElement {
     [d1, d2, d3].forEach((d, i) => $$("#steps i")[i].classList.toggle("on", d));
     const cur = !d1 ? 1 : !d2 ? 2 : 3;
     $("#stepl").textContent = `STEP ${cur} OF 3 · ${["TRIP DETAILS", "TRIP STYLE", "REVIEW & PAY"][cur - 1]}`;
+
+    // mobile step-by-step: the next step appears once the current one is complete (CSS only applies this on phones)
+    if (cur > this._rev && !this._hold) {
+      this._rev = cur;
+      $(".wrap").dataset.rev = String(this._rev);
+      if (cur === 2 && window.innerWidth <= 720) this.revealStep2();
+    }
 
     requestAnimationFrame(() => { this.fitPanel(); this.positionSummary(); });
   }
