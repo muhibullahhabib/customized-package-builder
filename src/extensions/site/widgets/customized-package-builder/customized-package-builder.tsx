@@ -490,7 +490,6 @@
 
 
 
-
 // @ts-nocheck
 // Trip builder: Wix site widget (custom element)
 import { SERVICES, PACKAGES, TIER_LABELS, calculate, nightsBetween } from "../../../../components/pricing";
@@ -708,6 +707,123 @@ select:disabled{opacity:.5;cursor:not-allowed}
   .pin span{font-size:12px;line-height:1.25;color:var(--mute)}
   .pin b{font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:22px;line-height:1.2;color:var(--text)}
   .pin .d b{color:var(--gold-d)}
+}
+/* Tablet (721px to 1000px): tighter spacing, text sizes follow the site's global styles */
+@media(min-width:721px) and (max-width:1000px){
+  :host{font-size:16px;line-height:1.5}
+  .wrap{padding:24px 20px;gap:20px}
+  h1{font-size:42px;line-height:1.1}
+  h2{font-size:28px;margin-bottom:4px}
+  h3{font-size:18px;margin-bottom:8px}
+  p.sub{font-size:16px;line-height:1.55;margin:6px 0 14px}
+  p.eyebrow{font-size:13px;margin:0 0 6px}
+  .intro{margin-bottom:16px;padding-bottom:16px}
+  .steps{margin-top:14px}
+  .stepl{font-size:13px;margin:8px 0 0}
+  section{padding:22px;margin-bottom:14px}
+  .row{gap:12px}
+  label{font-size:14px;margin-bottom:5px}
+  input:not([type=checkbox]),select{padding:10px 16px;font-size:16px}
+  select{padding-right:40px;background-position:right 16px center}
+  input[type=date]{min-height:44px}
+  .opts{gap:12px}
+  .opt{padding:14px 16px;font-size:16px}
+  .opt small{font-size:14px;margin-top:3px}
+  .tiers{gap:10px}
+  .tiers .opt{padding:12px 8px;font-size:16px}
+  .villas{gap:14px;margin-top:16px}
+  .villa{padding:14px}
+  .villa .ph{height:100px;margin-bottom:10px}
+  .villa b{font-size:20px}
+  .villa .note{font-size:14px;line-height:1.5;margin:6px 0 10px}
+  .cap{font-size:13px;margin-top:6px}
+  .exact{margin-top:14px}
+  .exact small{font-size:13px;margin-top:4px}
+  .legend{font-size:14px;margin-top:12px}
+  .pk{gap:12px}
+  .svc{gap:12px;padding:12px 0;font-size:16px}
+  .svc small{font-size:14px;margin-top:2px}
+  .qty button{width:40px;height:40px;font-size:20px}
+  .qty span{font-size:16px}
+  #terms h3{font-size:18px;margin:14px 0 6px}
+  .tp{font-size:16px;line-height:1.55;margin:0 0 8px}
+  .acc-ic{width:38px;height:38px}
+  aside{padding:22px}
+  aside h2{font-size:24px;margin-bottom:10px}
+  .ln{font-size:14px;padding:6px 0}
+  .tot{margin-top:10px;padding-top:12px}
+  .tot .ln{font-size:16px}
+  .dep b{font-size:24px}
+  .note{font-size:14px;line-height:1.55;margin:10px 0}
+  .contact{gap:10px;margin:18px 0 0;padding-top:16px}
+  .ack{font-size:13px;line-height:1.45;margin:14px 0 0}
+  .more{font-size:13px;margin:8px 0 0}
+  .go{font-size:16px;margin-top:16px;padding:14px}
+  .err{font-size:13px;margin-top:8px;min-height:16px}
+  .help{font-size:13px;margin:12px 0 0}
+}
+/* Mobile (720px and below): smaller text and tighter spacing */
+@media(max-width:720px){
+  :host{font-size:16px;line-height:1.5}
+  .wrap{padding-top:12px;padding-left:12px;padding-right:12px;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));gap:12px}
+  h1{font-size:32px;line-height:1.12}
+  h2{font-size:24px;margin-bottom:4px}
+  h3{font-size:18px;margin-bottom:8px}
+  p.sub{font-size:15px;line-height:1.5;margin:4px 0 12px}
+  p.eyebrow{font-size:13px;margin:0 0 4px}
+  .intro{margin-bottom:12px;padding-bottom:12px}
+  .steps{margin-top:12px;gap:8px}
+  .stepl{font-size:12px;margin:6px 0 0}
+  section{padding:16px;margin-bottom:12px;border-radius:16px}
+  .row,.opts,.tiers,.pk{gap:10px}
+  label{font-size:14px;margin-bottom:4px}
+  input:not([type=checkbox]),select{padding:10px 14px;font-size:16px}
+  select{padding-right:36px;background-position:right 14px center}
+  input[type=date]{min-height:44px}
+  .opt{padding:12px 14px;font-size:16px}
+  .opt small{font-size:14px;margin-top:3px}
+  .tiers .opt{padding:10px 8px;font-size:15px}
+  .badge{font-size:11px;padding:4px 10px}
+  .villas{gap:12px;margin-top:12px}
+  .villa{padding:12px}
+  .villa .ph{height:100px;margin-bottom:8px}
+  .villa b{font-size:20px}
+  .villa .note{font-size:14px;line-height:1.5;margin:4px 0 10px}
+  .cap{font-size:13px;margin-top:4px}
+  .exact{margin-top:12px}
+  .exact small{font-size:13px;margin-top:4px}
+  .legend{font-size:14px;margin-top:10px}
+  .svc{gap:10px;padding:10px 0;font-size:16px}
+  .svc small{font-size:13px;margin-top:2px}
+  .qty{gap:8px}
+  .qty button{width:40px;height:40px;font-size:20px}
+  .qty span{font-size:16px;min-width:22px}
+  #terms h3{font-size:18px;margin:12px 0 4px}
+  .tp{font-size:15px;line-height:1.55;margin:0 0 6px}
+  .acc-ic{width:36px;height:36px}
+  aside{padding:16px}
+  aside h2{font-size:22px;margin-bottom:8px}
+  .ln{font-size:14px;padding:5px 0}
+  .tot{margin-top:8px;padding-top:10px}
+  .tot .ln{font-size:15px}
+  .dep b{font-size:22px}
+  .note{font-size:14px;margin:8px 0}
+  .contact{gap:8px;margin:14px 0 0;padding-top:14px}
+  .ack{font-size:13px;line-height:1.45;margin:12px 0 0}
+  .more{font-size:13px;margin:6px 0 0}
+  .go{font-size:16px;margin-top:14px;padding:14px}
+  .err{font-size:13px;margin-top:6px;min-height:0}
+  .help{font-size:13px;margin:10px 0 0}
+  .pin{padding-top:8px}
+  .pin span{font-size:11.5px}
+  .pin b{font-size:20px}
+}
+@media(max-width:520px){
+  .wrap{padding-top:10px;padding-left:10px;padding-right:10px;gap:10px}
+  h1{font-size:30px}
+  h2{font-size:22px}
+  section{padding:14px;margin-bottom:10px}
+  aside{padding:14px}
 }
 /* Mobile: compact "Start with the basics" (2 fields per line) and step-by-step reveal */
 @media(max-width:720px){
