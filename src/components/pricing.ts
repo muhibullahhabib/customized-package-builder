@@ -62,22 +62,25 @@ export function calculate(state) {
   let yacht = 0;
   let estimated = false;
   let firstChoice = null;
+  let priceTbd = false; // true when the guest's 1st-choice villa has no price yet
 
   if (state.mode === "stay" && nights > 0) {
     const villas = DESTINATIONS[state.destination]?.tiers[state.tier] || [];
     const first = villas.find((v) => state.ranks?.[v.id] === "1");
     const second = villas.find((v) => state.ranks?.[v.id] === "2");
+    const priced = villas.filter((v) => v.nightly > 0);
     let nightly = 0;
-    if (first) {
-      firstChoice = first.name;
-      nightly = RULES.accommodationPriceRule === "highest-ranked" && second ? Math.max(first.nightly, second.nightly) : first.nightly;
-    } else if (villas.length) {
-      nightly = Math.min(...villas.map((v) => v.nightly)); // no 1st choice yet: show the lowest price in the tier as "from"
+    if (first) firstChoice = first.name;
+    if (first && first.nightly > 0) {
+      nightly = RULES.accommodationPriceRule === "highest-ranked" && second && second.nightly > 0 ? Math.max(first.nightly, second.nightly) : first.nightly;
+    } else if (priced.length) {
+      nightly = Math.min(...priced.map((v) => v.nightly)); // no priced 1st choice yet: show the lowest price in the tier as "from"
       estimated = true;
+      priceTbd = !!first; // the guest did choose a villa, but its price is not available
     }
     accommodation = nightly * nights;
     if (accommodation) {
-      const label = first ? `${first.name} (1st choice)` : `${TIER_LABELS[state.tier]} tier (from)`;
+      const label = first && !estimated ? `${first.name} (1st choice)` : `${TIER_LABELS[state.tier]} tier (from)`;
       lines.push({ label: `${label} · ${usdN(nightly)} × ${nights} night${nights > 1 ? "s" : ""}`, amount: accommodation });
     }
   }
@@ -117,7 +120,7 @@ export function calculate(state) {
   }
 
   return {
-    nights, lines, total, estimated, firstChoice, deposit, policy,
+    nights, lines, total, estimated, priceTbd, firstChoice, deposit, policy,
     balance: money(total - deposit),
     balanceDueDate: policy === "standard" && dueDate ? dueDate.toISOString().slice(0, 10) : null,
   };

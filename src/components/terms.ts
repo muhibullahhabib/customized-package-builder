@@ -60,7 +60,7 @@ export const RATING_LEGEND = [
   { name: "Luxury", levels: [
     "Comfortable, standard accommodations with basic finishes and amenities.",
     "Well-maintained, with upgraded finishes or furnishings and good amenities.",
-    "The most upscale feel, with high-end finishes, premium furnishings, or standout amenities.",
+    "An upscale feel, with high-end finishes, premium furnishings, or standout amenities.",
   ] },
   { name: "Value", levels: [
     "A fair option, but not especially strong for the price compared with other villas in its tier.",
