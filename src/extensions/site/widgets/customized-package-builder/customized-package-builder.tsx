@@ -491,7 +491,6 @@
 
 
 
-
 // @ts-nocheck
 // Trip builder: Wix site widget (custom element)
 import { SERVICES, PACKAGES, TIER_LABELS, calculate, nightsBetween } from "../../../../components/pricing";
@@ -725,6 +724,63 @@ select:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:360px){
   .basics input:not([type=checkbox]),.basics select{font-size:14px;padding-left:10px;padding-right:10px}
   .basics select{padding-right:28px}
+}
+/* Desktop only (1001px and up): font sizes follow the site's global text styles
+   (Heading 2 47px, Heading 3 31px, Heading 4/5 27px, Heading 6 20px, Paragraph 1/2/3 16/14/13px) and spacing is tightened */
+@media(min-width:1001px){
+  :host{font-size:16px;line-height:1.5}
+  .wrap{grid-template-columns:1fr 380px;gap:28px;padding:32px 32px 40px}
+  h1{font-size:47px;line-height:1.1}
+  h2{font-size:31px;margin-bottom:4px}
+  h3{font-size:20px;margin-bottom:8px}
+  p.sub{font-size:16px;line-height:1.55;margin:6px 0 16px}
+  p.eyebrow{font-size:13px;margin:0 0 6px}
+  .intro{margin-bottom:20px;padding-bottom:20px}
+  .steps{margin-top:16px}
+  .stepl{font-size:13px;margin:8px 0 0}
+  section{padding:24px;margin-bottom:16px}
+  .row{gap:14px}
+  label{font-size:14px;margin-bottom:6px}
+  input:not([type=checkbox]),select{padding:11px 18px;font-size:16px}
+  select{padding-right:44px;background-position:right 18px center}
+  input[type=date]{min-height:46px}
+  .opts{gap:12px}
+  .opt{padding:16px;font-size:16px}
+  .opt small{font-size:14px;margin-top:4px}
+  .tiers{gap:10px}
+  .tiers .opt{padding:14px 10px;font-size:16px}
+  .badge{font-size:11px;padding:4px 10px}
+  .villas{gap:14px;margin-top:16px}
+  .villa{padding:14px}
+  .villa .ph{height:100px;margin-bottom:10px}
+  .villa b{font-size:20px}
+  .villa .note{font-size:14px;line-height:1.5;margin:6px 0 10px}
+  .cap{font-size:13px;margin-top:6px}
+  .exact{margin-top:16px}
+  .exact small{font-size:13px;margin-top:4px}
+  .legend{font-size:14px;margin-top:12px}
+  .pk{gap:12px}
+  .svc{gap:14px;padding:12px 0;font-size:16px}
+  .svc small{font-size:14px;margin-top:2px}
+  .qty{gap:10px}
+  .qty button{width:38px;height:38px;font-size:20px}
+  .qty span{font-size:16px;min-width:24px}
+  #terms h3{font-size:20px;margin:16px 0 6px}
+  .tp{font-size:16px;line-height:1.55;margin:0 0 8px}
+  .acc-ic{width:38px;height:38px}
+  aside{padding:24px}
+  aside h2{font-size:27px;margin-bottom:10px}
+  .ln{font-size:14px;padding:6px 0}
+  .tot{margin-top:10px;padding-top:12px}
+  .tot .ln{font-size:16px}
+  .dep b{font-size:24px}
+  .note{font-size:14px;line-height:1.55;margin:10px 0}
+  .contact{gap:10px;margin:18px 0 0;padding-top:16px}
+  .ack{font-size:13px;line-height:1.45;margin:16px 0 0}
+  .more{font-size:13px;margin:8px 0 0}
+  .go{font-size:16px;margin-top:18px;padding:14px}
+  .err{font-size:13px;margin-top:8px;min-height:16px}
+  .help{font-size:13px;margin:12px 0 0}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}`;
 
