@@ -38,6 +38,7 @@ const DESTINATION_GROUPS = [
   { id: "cartagena", name: "Cartagena, Colombia", keywords: ["cartagena"] },
   { id: "medellin", name: "Medellin, Colombia", keywords: ["medellin"] },
   { id: "sosua", name: "Sosua, Dominican Republic", keywords: ["sosua"] },
+  { id: "jaco", name: "Jaco, Costa Rica", keywords: ["jaco"] },
   { id: "cap-cana-casa-de-campo", name: "Cap Cana/Casa De Campo, Dominican Republic", keywords: ["cap cana", "casa de campo", "la romana", "punta cana"] },
 ];
 

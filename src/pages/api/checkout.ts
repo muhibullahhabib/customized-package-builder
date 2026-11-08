@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { calculate, SERVICES } from "../../components/pricing";
+import { calculate, servicesFor } from "../../components/pricing";
 import { DESTINATIONS, setDestinations } from "../../components/villas";
 import { TERMS_VERSION } from "../../components/terms";
 import { fetchDestinations } from "../../server/catalog";
@@ -105,7 +105,7 @@ export async function POST({ request }) {
 
     // Readable services text and a balance-due value that is never empty
     const serviceText =
-      SERVICES.filter((s) => Number(body.services?.[s.id]) > 0)
+      servicesFor(body.destination).filter((s) => Number(body.services?.[s.id]) > 0)
         .map((s) => s.name + " x" + body.services[s.id])
         .join(", ") || "None";
     const balanceDueText =
