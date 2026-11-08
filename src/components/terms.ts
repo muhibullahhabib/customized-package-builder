@@ -2,7 +2,7 @@
 // terms.ts: client-approved wording shown before payment. Edit text here only.
 // Change TERMS_VERSION whenever the wording changes, so each booking records which version the guest accepted.
 
-export const TERMS_VERSION = "2026-10-v1";
+export const TERMS_VERSION = "2026-10-v2"; // v2: villa ranking has an optional 3rd choice
 
 export const TERMS_TITLE = "Before You Pay: Provisional Deposit & Final Pricing";
 
@@ -19,7 +19,7 @@ export const TERMS = [
   {
     title: "How your villa is selected",
     body: [
-      "Please rank your first and second villa preferences. Our team will check availability and try to secure your first choice. If it is unavailable, we'll review your other preferences and present an available option with its exact price. Ranking a villa does not guarantee availability or authorize us to charge you a higher amount.",
+      "Please rank your villa preferences: a first and second choice are required, and a third choice is optional. Our team will check availability and try to secure your first choice. If it is unavailable, we'll review your other preferences and present an available option with its exact price. Ranking a villa does not guarantee availability or authorize us to charge you a higher amount.",
     ],
   },
   {
@@ -49,6 +49,15 @@ export const TERMS = [
 // The checkbox the guest must tick before paying (exact wording from the client).
 export const ACK_TEXT =
   "I understand that my payment is a provisional deposit, my villa is not yet confirmed, and the checkout invoice is an estimate. Final pricing may change due to availability or seasonal rates. Any revised total requires my approval, and my deposit will be applied in full to the approved final invoice.";
+
+// Opens from the "More Info" link next to the planning fee (exact wording from the client).
+export const FEE_INFO_TITLE = "Transparent Pricing. Personal Service.";
+export const FEE_INFO = [
+  "Our 13.5% planning and service fee is our commission for organizing and coordinating your trip. We show it separately so you understand what you’re paying for and how we’re compensated.",
+  "We thoroughly vet our vendors, negotiate rates for accommodations, services, and tours, and pass those negotiated prices on to your group. Our fee covers personalized planning, booking coordination, communication with providers, and concierge support before and during your stay.",
+  "You choose the experiences. We handle the details—so everyone, including the group organizer, can sit back, relax, and enjoy knowing the trip is in good hands.",
+  "The fee is calculated on your selected accommodations, packages, tours, and services. It excludes separately listed taxes, payment-processing fees, and refundable security deposits.",
+];
 
 // Villa rating system (exact wording from the client).
 export const RATING_LEGEND = [

@@ -1,6 +1,9 @@
 // @ts-nocheck
-// pricing.ts: all prices and business rules in one place.
-// Service and package numbers are PLACEHOLDERS; replace them with the real prices.
+// pricing.ts: ALL prices and pricing rules, and the price calculation.
+// The widget (what the guest sees) and the server (what Stripe charges) both use this same file,
+// so the numbers always match.
+//
+// ⚠️ RATES: the service and package prices below are PLACEHOLDERS. Replace them with the final rates.
 import { DESTINATIONS } from "./villas";
 
 export const TIER_LABELS = { "4-6": "4–6 bedrooms", "7-9": "7–9 bedrooms", "10-12": "10–12 bedrooms", "13+": "13 or more bedrooms" };
@@ -14,7 +17,9 @@ export const SERVICES = [
   { id: "yacht", name: "Yacht", basis: "flat", price: 2500 },
 ];
 
-// Packages: price per guest + which services are included (confirm package contents with the client)
+// Packages: price per guest + which services are included (confirm package contents with the client).
+// A package is charged once. The services inside it are never charged again, and the planning fee
+// is calculated once on the package price.
 export const PACKAGES = {
   silver: { label: "Silver", tagline: "Core trip essentials", perPerson: 250, includes: ["chef"] },
   gold: { label: "Gold", tagline: "More included experiences", perPerson: 450, popular: true, includes: ["chef", "transport", "massage"] },
@@ -25,10 +30,20 @@ export const RULES = {
   // The estimate is based on the guest's FIRST-CHOICE villa (per the client's "Before You Pay" wording).
   // "first-choice" = price of the 1st-choice villa. "highest-ranked" = the higher price of the 1st and 2nd choice.
   accommodationPriceRule: "first-choice",
+
+  // Guys Paradise Planning & Service Fee: a percentage of the subtotal of the selected accommodation,
+  // package, tours and services. It also applies to services-only bookings. Taxes, payment-processing fees
+  // and refundable security deposits are NOT part of the subtotal (the builder has none of them).
+  serviceFeePct: 0.135,
+
   depositPct: 0.5,          // provisional deposit = 50% of accommodation + 50% of yacht
+  // ⚠️ To confirm with the client: true  = the planning fee on the accommodation and yacht is split the same way
+  //                                         (deposit = 50% of (accommodation + yacht) including its fee)
+  //                               false = the whole fee is paid with the balance
+  depositIncludesFee: true,
   balanceDueDaysBefore: 30, // balance is due 30 days before check-in
   // ⚠️ Not decided by the client yet; these are the working defaults:
-  servicesOnlyPayFullNow: true, // services-only bookings (no villa) are paid 100% now
+  servicesOnlyPayFullNow: true,  // services-only bookings (no villa) are paid 100% now
   withinWindowPayFullNow: false, // trips starting within 30 days: false = still the normal deposit now, and the
                                  // payment required is stated before final confirmation (matches the client's wording)
 };
@@ -46,13 +61,15 @@ export function nightsBetween(checkIn, checkOut) {
 /**
  * state = {
  *   mode: "stay" | "services",
- *   destination: "dr" | "cartagena" | "dest1",
+ *   destination: id of a destination built from the Rentals collection,
  *   checkIn, checkOut, guests,
  *   tier: "4-6",
- *   ranks: { villaId: "1" | "2" },
+ *   ranks: { villaId: "1" | "2" | "3" },   // 3rd choice is optional
  *   package: "silver" | "gold" | "platinum" | null,
  *   services: { chef: qty, atv: qty, yacht: 1, ... }   // qty > 0 means selected
  * }
+ *
+ * Returns the itemized lines, the subtotal, the planning fee, the total, and the deposit / balance.
  */
 export function calculate(state) {
   const nights = nightsBetween(state.checkIn, state.checkOut);
@@ -90,7 +107,7 @@ export function calculate(state) {
     lines.push({ label: `${pkg.label} package × ${guests} guest${guests > 1 ? "s" : ""}`, amount: pkg.perPerson * guests });
   }
 
-  // services included in the package are not charged twice
+  // services included in the package are not charged twice (so the fee is not charged on them twice either)
   const covered = new Set(pkg ? pkg.includes : []);
   for (const s of SERVICES) {
     const qty = Number(state.services?.[s.id]) || 0;
@@ -103,12 +120,16 @@ export function calculate(state) {
   // a yacht included in a package also counts toward the deposit
   if (pkg && pkg.includes.includes("yacht")) yacht += SERVICES.find((s) => s.id === "yacht").price;
 
-  const total = money(lines.reduce((t, l) => t + l.amount, 0));
+  // subtotal -> planning fee -> total
+  const subtotal = money(lines.reduce((t, l) => t + l.amount, 0));
+  const serviceFee = money(subtotal * RULES.serviceFeePct);
+  const total = money(subtotal + serviceFee);
 
   // deposit and balance
   const daysToTrip = state.checkIn ? Math.ceil((new Date(state.checkIn) - Date.now()) / dayMs) : null;
   const dueDate = state.checkIn ? new Date(new Date(state.checkIn) - RULES.balanceDueDaysBefore * dayMs) : null;
-  let deposit = money((accommodation + yacht) * RULES.depositPct);
+  const depositBase = (accommodation + yacht) * RULES.depositPct;
+  let deposit = money(RULES.depositIncludesFee ? depositBase * (1 + RULES.serviceFeePct) : depositBase);
   let policy = "standard";
 
   if (state.mode === "services") {
@@ -120,7 +141,7 @@ export function calculate(state) {
   }
 
   return {
-    nights, lines, total, estimated, priceTbd, firstChoice, deposit, policy,
+    nights, lines, subtotal, serviceFee, serviceFeePct: RULES.serviceFeePct, total, estimated, priceTbd, firstChoice, deposit, policy,
     balance: money(total - deposit),
     balanceDueDate: policy === "standard" && dueDate ? dueDate.toISOString().slice(0, 10) : null,
   };
