@@ -188,8 +188,8 @@ select:disabled{opacity:.5;cursor:not-allowed}
 .sent i{position:absolute;left:0;width:1px;height:1px}
 .pin{display:none}
 /* Planning fee line and its "More Info" link */
-.info{background:none;border:0;padding:0;margin-left:6px;color:var(--gold-d);font:inherit;font-size:13px;font-weight:500;text-decoration:underline;cursor:pointer;white-space:nowrap}
-.info:hover{color:var(--gold)}
+.feelink{background:none;border:0;padding:0;margin-left:6px;color:var(--gold-d);font:inherit;font-size:13px;font-weight:500;text-decoration:underline;cursor:pointer;white-space:nowrap}
+.feelink:hover{color:var(--gold)}
 .tot .ln.sub{padding-bottom:2px}
 .tot .ln.fee{padding-top:2px}
 /* "More Info" explanation window */
@@ -466,7 +466,61 @@ select:disabled{opacity:.5;cursor:not-allowed}
   .err{font-size:13px;margin-top:8px;min-height:16px}
   .help{font-size:13px;margin:12px 0 0}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}`;
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.dt{display:block;width:100%;min-height:52px;padding:14px 48px 14px 20px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238f6d37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='3'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E") no-repeat right 18px center;color:var(--mute);border:1px solid #d6ccb9;border-radius:999px;font:inherit;font-size:18px;text-align:left;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.dt:hover{border-color:var(--gold)}
+.dt.has{color:var(--text)}
+.stayhint{margin:16px 0 0;font-size:16px;color:var(--gold-d)}
+.stayhint:empty{display:none}
+.stayhint.warn{color:#b4402e}
+.ovb.cal{max-width:920px;padding:28px 28px 22px}
+.calrule{color:var(--mute);font-size:17px;margin:0 0 18px}
+.calrule b{color:var(--gold-d)}
+.calmonths{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.calmonths.one{grid-template-columns:1fr}
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calh h4{font-size:21px;margin:0;font-weight:600}
+.calnavb{width:46px;height:46px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--gold-d);font-size:26px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.calnavb:hover:not(:disabled){border-color:var(--gold)}
+.calnavb:disabled{opacity:.35;cursor:not-allowed}
+.calnavb.ph{border:0;background:none;cursor:default}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px 0}
+.wd{font-size:14px;font-weight:600;color:var(--mute);text-align:center;padding:6px 0}
+.cd{height:54px;border:0;border-radius:12px;background:transparent;color:var(--text);font:inherit;font-size:19px;font-weight:500;cursor:pointer;padding:0;transition:background .1s}
+.cd.e{visibility:hidden;cursor:default}
+.cd:hover:not(:disabled){background:var(--cream);box-shadow:inset 0 0 0 1px var(--gold)}
+.cd:disabled{color:#bdb7aa;cursor:not-allowed}
+.cd.blk{background:repeating-linear-gradient(45deg,#f1ebdd,#f1ebdd 6px,#faf6ee 6px,#faf6ee 12px);color:#a39b8b}
+.cd.rg{background:var(--cream);border-radius:0}
+.cd.st,.cd.en{background:linear-gradient(180deg,#c09a5d,#a3803f);color:#fff;font-weight:700;box-shadow:none}
+.cd.st.hasend{border-radius:12px 0 0 12px}
+.cd.en{border-radius:0 12px 12px 0}
+.cd.st.en{border-radius:12px}
+.calf{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.calsum{font-size:18px;font-weight:500;color:var(--text)}
+.calbtns{display:flex;align-items:center;gap:16px}
+.calbtns .go{margin-top:0}
+.ghost{background:none;border:0;color:var(--gold-d);font:inherit;font-size:16px;text-decoration:underline;cursor:pointer;padding:6px}
+@media(max-width:720px){
+  .dt{min-height:44px;padding:10px 38px 10px 12px;font-size:15px;background-position:right 12px center}
+  .calmonths{grid-template-columns:1fr}
+  .cd{height:46px;font-size:17px}
+  .ovb.cal{padding:22px 14px 16px}
+  .calf{flex-direction:column;align-items:stretch}
+  .calbtns{justify-content:space-between}
+}
+@media(max-width:480px){.dt{font-size:14px}}
+/* Services rows: long names and prices wrap inside their own column and never run under the + / - buttons */
+.svc .info{min-width:0;overflow-wrap:anywhere;white-space:normal}
+/* Start with the basics: destination, check-in, check-out and group size all have exactly the same height */
+.basics{--fh:52px;--ff:18px}
+.basics select,.basics input:not([type=checkbox]),.basics .dt{height:var(--fh);min-height:var(--fh);font-size:var(--ff);padding-top:0;padding-bottom:0;line-height:normal}
+.basics .dt{display:flex;align-items:center;padding-left:18px;padding-right:46px;background-position:right 16px center}
+@media(min-width:1001px){.basics{--fh:46px;--ff:16px}}
+@media(min-width:721px) and (max-width:1000px){.basics{--fh:44px;--ff:16px}}
+@media(max-width:720px){.basics{--fh:44px;--ff:15px}.basics .dt{padding-left:12px;padding-right:34px;background-position:right 12px center}}
+@media(max-width:360px){.basics{--ff:14px}}
+`;
 
 class TripBuilder extends HTMLElement {
   constructor() {
@@ -799,7 +853,9 @@ class TripBuilder extends HTMLElement {
     if (!this._ov) return;
     this._ov.remove();
     this._ov = null;
-    const b = this.shadowRoot.querySelector("#feeInfo");
+    this._cal = null;
+    const b = this.shadowRoot.querySelector(this._ovFocus || "#feeInfo");
+    this._ovFocus = "";
     if (b) b.focus();
   }
 
@@ -809,6 +865,163 @@ class TripBuilder extends HTMLElement {
       const el = this.shadowRoot.querySelector("#modeSec");
       if (el) el.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
     });
+  }
+
+  // ---- Calendar (big date-range picker that also shows the villa's minimum stay) ----
+  // The minimum stay: the first-choice villa's own minimum if one is chosen, otherwise the lowest minimum among the villas shown.
+  minStay() {
+    if (this.s.mode !== "stay") return { n: 1, max: 1, who: "", varies: false };
+    const villas = this.villasNow();
+    const first = villas.find((v) => this.s.ranks[v.id] === "1");
+    if (first) return { n: first.minNights || 1, max: first.minNights || 1, who: first.minNights ? first.name : "", varies: false };
+    const mins = villas.map((v) => v.minNights || 1); // a villa without a minimum accepts 1 night
+    if (!mins.length) return { n: 1, max: 1, who: "", varies: false };
+    return { n: Math.min(...mins), max: Math.max(...mins), who: "", varies: Math.max(...mins) > Math.min(...mins) };
+  }
+
+  // The sentence that explains the minimum stay ("" when there is nothing to say)
+  stayText(ms) {
+    if (ms.who) return `${ms.who} requires a minimum stay of ${ms.n} nights.`;
+    if (ms.n > 1) return `Minimum stay: ${ms.n} nights${ms.varies ? " or more, depending on the villa" : ""}.`;
+    if (ms.max > 1) return `Some villas require a minimum stay of up to ${ms.max} nights.`;
+    return "";
+  }
+
+  syncDates() {
+    const set = (id, v) => {
+      const b = this.shadowRoot.querySelector(id);
+      b.querySelector("span").textContent = v ? fmtDate(v) : "Select date";
+      b.classList.toggle("has", !!v);
+    };
+    set("#in", this.s.checkIn);
+    set("#out", this.s.checkOut);
+  }
+
+  openCalendar(which) {
+    if (this._ov) return;
+    const ms = this.minStay();
+    const today = new Date().toISOString().slice(0, 10);
+    const base = this.s.checkIn || today;
+    const c = (this._cal = {
+      mode: which === "out" && this.s.checkIn ? "out" : "in",
+      start: this.s.checkIn || "", end: this.s.checkOut || "", hover: "",
+      min: Math.max(1, ms.n), ms, y: Number(base.slice(0, 4)), m: Number(base.slice(5, 7)) - 1,
+    });
+    const ov = document.createElement("div");
+    ov.className = "ov";
+    ov.setAttribute("role", "dialog");
+    ov.setAttribute("aria-modal", "true");
+    ov.setAttribute("aria-labelledby", "calT");
+    ov.innerHTML = `<div class="ovb cal"><button type="button" class="ovx" aria-label="Close">&times;</button><div class="calbody"></div></div>`;
+    const vis = this._vis && this._vis.size ? [...this._vis] : null;
+    if (this._mode === "observe" && vis) {
+      const a = Math.min(...vis), b = Math.max(...vis);
+      Object.assign(ov.style, { position: "absolute", left: "0", right: "0", top: a * STEP + "px", height: (b - a + 1) * STEP + "px" });
+    } else {
+      Object.assign(ov.style, { position: "fixed", top: "0", right: "0", bottom: "0", left: "0" });
+    }
+    const close = () => this.closeFeeInfo();
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) return close();
+      const b = e.target.closest("button");
+      if (!b || b.disabled) return;
+      if (b.classList.contains("ovx")) return close();
+      if (b.dataset.nav) { const d = new Date(Date.UTC(c.y, c.m + Number(b.dataset.nav), 1)); c.y = d.getUTCFullYear(); c.m = d.getUTCMonth(); return this.drawCal(); }
+      if (b.dataset.clear) { c.start = ""; c.end = ""; c.hover = ""; c.mode = "in"; return this.drawCal(); }
+      if (b.dataset.done) { this.applyCal(); return close(); }
+      if (b.dataset.d) this.pickDate(b.dataset.d);
+    });
+    ov.addEventListener("mouseover", (e) => {
+      const b = e.target.closest(".cd[data-d]");
+      if (!b || b.disabled || !c.start || c.end) return;
+      c.hover = b.dataset.d; this.paintCal();
+    });
+    ov.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    this.shadowRoot.appendChild(ov);
+    this._ov = ov;
+    this._ovFocus = which === "out" ? "#out" : "#in";
+    this.drawCal();
+    ov.querySelector(".ovx").focus();
+  }
+
+  pickDate(d) {
+    const c = this._cal;
+    if (!c || d < new Date().toISOString().slice(0, 10)) return;
+    if (c.mode === "out" && c.start) {
+      if (d >= addDays(c.start, c.min)) { c.end = d; this.applyCal(); this.closeFeeInfo(); return; }
+      if (d > c.start) return; // inside the minimum stay
+      c.start = d; c.end = ""; c.hover = "";
+    } else {
+      c.start = d; c.end = ""; c.mode = "out"; c.hover = "";
+    }
+    this.drawCal();
+  }
+
+  applyCal() {
+    const c = this._cal;
+    if (!c) return;
+    this.s.checkIn = c.start; this.s.checkOut = c.end;
+    this.syncDates(); this.refresh();
+  }
+
+  drawCal() {
+    const c = this._cal, ov = this._ov;
+    if (!c || !ov) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const ty = Number(today.slice(0, 4)), tm = Number(today.slice(5, 7)) - 1;
+    const two = window.innerWidth > 760;
+    const minEnd = c.start ? addDays(c.start, c.min) : "";
+    const names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = (y, m, prev, next) => {
+      const lead = new Date(Date.UTC(y, m, 1)).getUTCDay(), n = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      let cells = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((w) => `<span class="wd">${w}</span>`).join("");
+      for (let i = 0; i < lead; i++) cells += `<span class="cd e"></span>`;
+      for (let day = 1; day <= n; day++) {
+        const d = new Date(Date.UTC(y, m, day)).toISOString().slice(0, 10);
+        const past = d < today, blk = c.mode === "out" && !!c.start && d > c.start && d < minEnd;
+        cells += `<button type="button" class="cd${blk ? " blk" : ""}" data-d="${d}"${past || blk ? " disabled" : ""}${blk ? ` title="Minimum stay: ${c.min} nights"` : ""} aria-label="${fmtDate(d)}">${day}</button>`;
+      }
+      const canPrev = y * 12 + m > ty * 12 + tm;
+      const pb = prev ? `<button type="button" class="calnavb" data-nav="-1" aria-label="Previous month"${canPrev ? "" : " disabled"}>&#8249;</button>` : `<span class="calnavb ph"></span>`;
+      const nb = next ? `<button type="button" class="calnavb" data-nav="1" aria-label="Next month">&#8250;</button>` : `<span class="calnavb ph"></span>`;
+      return `<div class="calm"><div class="calh">${pb}<h4>${names[m]} ${y}</h4>${nb}</div><div class="calg">${cells}</div></div>`;
+    };
+    const n2 = new Date(Date.UTC(c.y, c.m + 1, 1));
+    const months = two
+      ? month(c.y, c.m, true, false) + month(n2.getUTCFullYear(), n2.getUTCMonth(), false, true)
+      : month(c.y, c.m, true, true);
+    const ms = c.ms;
+    const rule = this.stayText(ms)
+      ? `<p class="calrule"><b>${this.stayText(ms)}</b>${ms.n > 1 ? " Days that are too soon after check-in are shaded." : ""}</p>`
+      : "";
+    ov.querySelector(".calbody").innerHTML = `<h3 id="calT">Select your dates</h3>${rule}<div class="calmonths${two ? "" : " one"}">${months}</div>
+      <div class="calf"><div class="calsum" id="calsum" aria-live="polite"></div>
+      <div class="calbtns"><button type="button" class="ghost" data-clear="1">Clear dates</button><button type="button" class="go" data-done="1">Apply dates</button></div></div>`;
+    this.paintCal();
+  }
+
+  // Colors the chosen range without redrawing (used while the mouse moves over the days)
+  paintCal() {
+    const c = this._cal, ov = this._ov;
+    if (!c || !ov) return;
+    const minEnd = c.start ? addDays(c.start, c.min) : "";
+    const hov = !c.end && c.start && c.hover && c.hover >= minEnd ? c.hover : "";
+    const last = c.end || hov;
+    ov.querySelectorAll(".cd[data-d]").forEach((b) => {
+      const d = b.dataset.d;
+      b.classList.toggle("st", d === c.start);
+      b.classList.toggle("en", !!last && d === last);
+      b.classList.toggle("rg", !!c.start && !!last && d > c.start && d < last);
+      b.classList.toggle("hasend", d === c.start && !!last);
+    });
+    const sum = ov.querySelector("#calsum");
+    if (!sum) return;
+    if (!c.start) sum.textContent = "Choose your check-in date.";
+    else if (!last) sum.textContent = c.min > 1 ? `Check-in ${fmtDate(c.start)} · earliest check-out ${fmtDate(minEnd)}` : `Check-in ${fmtDate(c.start)} · now choose check-out`;
+    else {
+      const nights = nightsBetween(c.start, last);
+      sum.textContent = `${fmtDate(c.start)} → ${fmtDate(last)} · ${nights} night${nights > 1 ? "s" : ""}`;
+    }
   }
 
   build() {
@@ -830,10 +1043,10 @@ class TripBuilder extends HTMLElement {
         <p class="sub">We'll use these details to build your trip options.</p>
         <div class="row">
           <div><label for="dest">Destination</label><select id="dest"><option value="">Choose</option>${dest}</select></div>
-          <div><label for="in">Check-in</label><input id="in" type="date"></div>
-          <div><label for="out">Check-out</label><input id="out" type="date"></div>
+          <div><label for="in">Check-in</label><button type="button" class="dt" id="in" aria-haspopup="dialog"><span>Select date</span></button></div>
+          <div><label for="out">Check-out</label><button type="button" class="dt" id="out" aria-haspopup="dialog"><span>Select date</span></button></div>
           <div><label for="gs">Group size</label><input id="gs" type="number" min="1" inputmode="numeric" placeholder="Guests"></div>
-        </div></section>
+        </div><p class="stayhint" id="stayHint" role="status"></p></section>
 
       <section id="modeSec" data-step="2"><h2>How would you like to build your trip?</h2>
         <p class="sub">Choose a stay with experiences, or book services only.</p>
@@ -864,7 +1077,7 @@ class TripBuilder extends HTMLElement {
       <div class="facts" id="facts"></div><div id="lines"></div>
       <div class="tot">
         <div class="ln sub"><span>Subtotal</span><b id="subtotal">$0</b></div>
-        <div class="ln fee"><span>Guys Paradise Planning &amp; Service Fee — ${FEE_PCT_TEXT}%<button type="button" class="info" id="feeInfo" aria-haspopup="dialog">More Info</button></span><b id="fee">$0</b></div>
+        <div class="ln fee"><span>Guys Paradise Planning &amp; Service Fee — ${FEE_PCT_TEXT}%<button type="button" class="feelink" id="feeInfo" aria-haspopup="dialog">More Info</button></span><b id="fee">$0</b></div>
         <div class="ln"><span id="lblTotal">Estimated trip total</span><b id="total">$0</b></div>
         <div class="ln dep"><span id="lblDep">Provisional deposit due now</span><b id="dep">$0</b></div>
         <div class="ln"><span id="lblBal">Estimated remaining balance</span><b id="bal">$0</b></div>
@@ -882,10 +1095,9 @@ class TripBuilder extends HTMLElement {
 
     const $ = (q) => this.shadowRoot.querySelector(q);
     const $$ = (q) => this.shadowRoot.querySelectorAll(q);
-    $("#in").min = new Date().toISOString().slice(0, 10);
+    $("#in").onclick = () => this.openCalendar("in");
+    $("#out").onclick = () => this.openCalendar("out");
     $("#dest").onchange = (e) => { this.s.destination = e.target.value; this.s.ranks = {}; this.pruneServices(); this.renderServices(); this.renderVillas(); this.refresh(); };
-    $("#in").onchange = (e) => { this.s.checkIn = e.target.value; if (e.target.value) $("#out").min = addDays(e.target.value, 1); this.refresh(); };
-    $("#out").onchange = (e) => { this.s.checkOut = e.target.value; this.refresh(); };
     $("#gs").oninput = (e) => {
       this.s.guests = e.target.value; this.renderVillas(); this.renderServices();
       this._hold = true; clearTimeout(this._holdT); // do not move to the next step while the number is still being typed
@@ -915,6 +1127,7 @@ class TripBuilder extends HTMLElement {
       this.refresh();
     };
     this.renderServices();
+    this.syncDates();
     ["#nm", "#em", "#ph"].forEach((q) => ($(q).oninput = () => this.refresh()));
     $("#ack").onchange = () => this.refresh();
     $("#feeInfo").onclick = () => this.openFeeInfo();
@@ -1075,6 +1288,15 @@ class TripBuilder extends HTMLElement {
       $(".wrap").dataset.rev = String(this._rev);
       if (cur === 2 && window.innerWidth <= 720) this.revealStep2();
     }
+
+    // minimum stay hint under the dates
+    const ms = this.minStay(), hint = $("#stayHint");
+    let msg = "", warn = false;
+    if (isStay && s.destination && this.stayText(ms)) {
+      msg = this.stayText(ms);
+      if (c.nights > 0 && c.nights < ms.n) { warn = true; msg += " Your dates are shorter, please adjust them."; }
+    }
+    hint.textContent = msg; hint.classList.toggle("warn", warn);
 
     requestAnimationFrame(() => { this.fitPanel(); this.positionSummary(); });
   }
