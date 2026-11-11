@@ -1,6 +1,6 @@
 // @ts-nocheck
 // Trip builder: Wix site widget (custom element)
-import { servicesFor, PACKAGES, TIER_LABELS, RULES, calculate, nightsBetween, maxQty as maxQtyOf, defaultQty as defaultQtyOf, priceText, isCovered, regionLabel } from "../../../../components/pricing";
+import { servicesFor, packagesFor, TIER_LABELS, RULES, calculate, nightsBetween, maxQty as maxQtyOf, defaultQty as defaultQtyOf, priceText, isCovered, includedQty, regionLabel, MAX_STAFF } from "../../../../components/pricing";
 import { TERMS_VERSION, TERMS_TITLE, TERMS_INTRO, TERMS, ACK_TEXT, RATING_LEGEND, FEE_INFO_TITLE, FEE_INFO } from "../../../../components/terms";
 import { httpClient } from "@wix/essentials";
 import { location as wixLocation } from "@wix/site-location";
@@ -188,8 +188,8 @@ select:disabled{opacity:.5;cursor:not-allowed}
 .sent i{position:absolute;left:0;width:1px;height:1px}
 .pin{display:none}
 /* Planning fee line and its "More Info" link */
-.feelink{background:none;border:0;padding:0;margin-left:6px;color:var(--gold-d);font:inherit;font-size:13px;font-weight:500;text-decoration:underline;cursor:pointer;white-space:nowrap}
-.feelink:hover{color:var(--gold)}
+.info{background:none;border:0;padding:0;margin-left:6px;color:var(--gold-d);font:inherit;font-size:13px;font-weight:500;text-decoration:underline;cursor:pointer;white-space:nowrap}
+.info:hover{color:var(--gold)}
 .tot .ln.sub{padding-bottom:2px}
 .tot .ln.fee{padding-top:2px}
 /* "More Info" explanation window */
@@ -510,6 +510,7 @@ select:disabled{opacity:.5;cursor:not-allowed}
   .calbtns{justify-content:space-between}
 }
 @media(max-width:480px){.dt{font-size:14px}}
+
 /* Services rows: long names and prices wrap inside their own column and never run under the + / - buttons */
 .svc .info{min-width:0;overflow-wrap:anywhere;white-space:normal}
 /* Start with the basics: destination, check-in, check-out and group size all have exactly the same height */
@@ -520,6 +521,26 @@ select:disabled{opacity:.5;cursor:not-allowed}
 @media(min-width:721px) and (max-width:1000px){.basics{--fh:44px;--ff:16px}}
 @media(max-width:720px){.basics{--fh:44px;--ff:15px}.basics .dt{padding-left:12px;padding-right:34px;background-position:right 12px center}}
 @media(max-width:360px){.basics{--ff:14px}}
+/* Packages: price, minimum guests and what is included */
+.pk{align-items:start}
+.pkc{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pkc .opt{height:auto}
+.opt:disabled{opacity:.55;cursor:not-allowed}
+.opt:disabled:hover{border-color:var(--line)}
+.lowg{margin:0;color:#b4402e;font-size:14px;line-height:1.4}
+.cust{align-self:flex-start;padding:10px 18px;background:#fff;border:1px solid var(--gold);border-radius:999px;color:var(--gold-d);font:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.cust:hover{background:var(--gold);color:#fff}
+.pinc{font-size:15px}
+.pinc summary{cursor:pointer;color:var(--gold-d);font-weight:500}
+.pinc ul{margin:8px 0 0;padding-left:20px;color:var(--mute);line-height:1.5}
+.pinc li{margin:3px 0}
+/* Services with two choices (people and hours) and packages that include only some days */
+.qtys{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.qrow{display:flex;align-items:center;gap:10px}
+.qrow small{margin:0;color:var(--mute);font-size:14px;font-weight:400}
+.svc.inc.part .qty{display:flex}
+.svc.inc:not(.part) .qtys{display:none}
+@media(max-width:520px){.qrow small{font-size:12px}}
 `;
 
 class TripBuilder extends HTMLElement {
@@ -528,7 +549,7 @@ class TripBuilder extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.s = {
       mode: "stay", destination: "", checkIn: "", checkOut: "", guests: "", tier: "4-6", exactBedrooms: "",
-      ranks: {}, package: null, services: {}, svcTab: "regular"
+      ranks: {}, package: null, services: {}, staff: {}, svcTab: "regular"
     };
     this._rev = 1; // furthest step shown on mobile (1 to 3)
   }
@@ -1028,7 +1049,6 @@ class TripBuilder extends HTMLElement {
     this._ov = null;
     const dest = Object.entries(DESTINATIONS).map(([k, d]) => `<option value="${k}">${d.name}</option>`).join("");
     const tiers = Object.entries(TIER_LABELS).map(([k, l]) => `<button class="opt tier" data-tier="${k}">${l}</button>`).join("");
-    const pk = Object.entries(PACKAGES).map(([k, p]) => `<button class="opt pkg" data-pkg="${k}">${p.popular ? '<span class="badge">Popular</span>' : ""}${p.label}<small>${p.tagline}</small><small class="pp">${usd(p.perPerson)} / guest</small></button>`).join("");
     const legend = RATING_LEGEND.map((g) => `<dt>${g.name}</dt>` + g.levels.map((t, i) => `<dd>${"★".repeat(i + 1)}${"☆".repeat(2 - i)} ${t}</dd>`).join("")).join("");
     const terms = TERMS.map((t) => `<h3>${t.title}</h3>` + t.body.map((x) => `<p class="tp">${x}</p>`).join("")).join("");
     const more = MORE_SERVICES_URL ? `<p class="note"><a href="${MORE_SERVICES_URL}" target="_top">More experiences: explore all services</a></p>` : "";
@@ -1062,9 +1082,9 @@ class TripBuilder extends HTMLElement {
         <details class="legend"><summary>What do the stars mean?</summary><dl>${legend}</dl></details>
         <div class="villas" id="villas"></div></section>
 
-      <section id="pkgs" data-step="2"><h2>Pick a package</h2><p class="sub">Or build your own from the services below.</p><div class="pk">${pk}</div></section>
+      <section id="pkgs" data-step="2"><h2>Pick a package</h2><p class="sub">Silver packages are for groups of 6 or more, and Gold and Platinum packages for groups of 10 or more. Smaller groups can customize their own package below.</p><div id="pkgBox"></div></section>
 
-      <section data-step="2"><h2>Build your own</h2><p class="sub">Add services; the price updates based on each service's pricing. Services already in your package are not charged twice.</p><div id="svcBox"></div>${more}</section>
+      <section id="svcSec" data-step="2"><h2>Build your own</h2><p class="sub">Add services; the price updates based on each service's pricing. Services already in your package are not charged twice.</p><div id="svcBox"></div>${more}</section>
 
       <section id="terms" data-step="3">
         <h2 class="acc-h2"><button type="button" class="acc-btn" id="termsBtn" aria-expanded="false" aria-controls="termsBody"><span>${TERMS_TITLE}</span><span class="acc-ic" aria-hidden="true"><svg width="16" height="10" viewBox="0 0 14 9"><path d="M1 1.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h2>
@@ -1077,7 +1097,7 @@ class TripBuilder extends HTMLElement {
       <div class="facts" id="facts"></div><div id="lines"></div>
       <div class="tot">
         <div class="ln sub"><span>Subtotal</span><b id="subtotal">$0</b></div>
-        <div class="ln fee"><span>Guys Paradise Planning &amp; Service Fee — ${FEE_PCT_TEXT}%<button type="button" class="feelink" id="feeInfo" aria-haspopup="dialog">More Info</button></span><b id="fee">$0</b></div>
+        <div class="ln fee"><span>Guys Paradise Planning &amp; Service Fee — ${FEE_PCT_TEXT}%<button type="button" class="info" id="feeInfo" aria-haspopup="dialog">More Info</button></span><b id="fee">$0</b></div>
         <div class="ln"><span id="lblTotal">Estimated trip total</span><b id="total">$0</b></div>
         <div class="ln dep"><span id="lblDep">Provisional deposit due now</span><b id="dep">$0</b></div>
         <div class="ln"><span id="lblBal">Estimated remaining balance</span><b id="bal">$0</b></div>
@@ -1097,9 +1117,9 @@ class TripBuilder extends HTMLElement {
     const $$ = (q) => this.shadowRoot.querySelectorAll(q);
     $("#in").onclick = () => this.openCalendar("in");
     $("#out").onclick = () => this.openCalendar("out");
-    $("#dest").onchange = (e) => { this.s.destination = e.target.value; this.s.ranks = {}; this.pruneServices(); this.renderServices(); this.renderVillas(); this.refresh(); };
+    $("#dest").onchange = (e) => { this.s.destination = e.target.value; this.s.ranks = {}; this.pruneServices(); this.renderServices(); this.renderPackages(); this.renderVillas(); this.refresh(); };
     $("#gs").oninput = (e) => {
-      this.s.guests = e.target.value; this.renderVillas(); this.renderServices();
+      this.s.guests = e.target.value; this.renderVillas(); this.renderServices(); this.renderPackages();
       this._hold = true; clearTimeout(this._holdT); // do not move to the next step while the number is still being typed
       this._holdT = setTimeout(() => { this._hold = false; this.refresh(); }, 900);
       this.refresh();
@@ -1113,12 +1133,24 @@ class TripBuilder extends HTMLElement {
     };
     $$(".mode").forEach((b) => (b.onclick = () => { this.s.mode = b.dataset.mode; this.refresh(); }));
     $$(".tier").forEach((b) => (b.onclick = () => { this.s.tier = b.dataset.tier; this.s.ranks = {}; this.s.exactBedrooms = ""; $("#br").value = ""; this.renderVillas(); this.refresh(); }));
-    $$(".pkg").forEach((b) => (b.onclick = () => { this.s.package = this.s.package === b.dataset.pkg ? null : b.dataset.pkg; this.refresh(); }));
+    $("#pkgBox").onclick = (e) => {
+      if (e.target.closest(".cust")) { $("#svcSec").scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" }); return; }
+      const b = e.target.closest(".pkg");
+      if (!b || b.disabled) return;
+      this.s.package = this.s.package === b.dataset.pkg ? null : b.dataset.pkg;
+      this.refresh();
+    };
     $("#svcBox").onclick = (e) => {
       const t = e.target.closest(".tab");
       if (t) { this.s.svcTab = t.dataset.tab; this.renderServices(); this.refresh(); return; }
       const b = e.target.closest(".qty button");
       if (!b) return;
+      if (b.parentElement.dataset.staff) {
+        const sid = b.parentElement.dataset.staff, cur = this.s.staff[sid] || 1;
+        this.s.staff[sid] = Math.min(MAX_STAFF, Math.max(1, cur + Number(b.dataset.d)));
+        this.refresh();
+        return;
+      }
       const id = b.parentElement.dataset.svc, svc = servicesFor(this.s.destination).find((x) => x.id === id);
       if (!svc) return;
       const cur = this.s.services[id] || 0;
@@ -1127,6 +1159,7 @@ class TripBuilder extends HTMLElement {
       this.refresh();
     };
     this.renderServices();
+    this.renderPackages();
     this.syncDates();
     ["#nm", "#em", "#ph"].forEach((q) => ($(q).oninput = () => this.refresh()));
     $("#ack").onchange = () => this.refresh();
@@ -1194,6 +1227,7 @@ class TripBuilder extends HTMLElement {
   pruneServices() {
     const ids = new Set(servicesFor(this.s.destination).map((x) => x.id));
     for (const k of Object.keys(this.s.services)) if (!ids.has(k)) delete this.s.services[k];
+    for (const k of Object.keys(this.s.staff)) if (!ids.has(k)) delete this.s.staff[k];
   }
 
   // "Build your own": two tabs, the services offered everywhere and the experiences of the chosen destination
@@ -1208,10 +1242,32 @@ class TripBuilder extends HTMLElement {
     const place = regionLabel(d);
     const tabs = [["regular", "Services"], ["location", place ? place + " Experiences" : "Experiences"]]
       .map(([k, t]) => `<button type="button" class="tab${k === tab ? " on" : ""}" data-tab="${k}" role="tab" aria-selected="${k === tab}">${t}<b class="cnt" data-cnt="${k}" hidden></b></button>`).join("");
-    const rows = list.filter((x) => x.tab === tab).map((x) => `
-      <div class="svc" data-row="${x.id}"><div class="info">${x.name}<small>${priceText(x, this.s)}</small><small class="incl">Included in your package</small></div>
-      <div class="qty" data-svc="${x.id}"><button type="button" data-d="-1" aria-label="Less ${x.name}">−</button><span>0</span><button type="button" data-d="1" aria-label="More ${x.name}">+</button></div></div>`).join("");
+    const stepper = (attr, id, label, val) => `<div class="qty" data-${attr}="${id}"><button type="button" data-d="-1" aria-label="Less ${label}">−</button><span>${val}</span><button type="button" data-d="1" aria-label="More ${label}">+</button></div>`;
+    const rows = list.filter((x) => x.tab === tab).map((x) => {
+      const ctl = x.basis === "staffhour"
+        ? `<div class="qtys"><div class="qrow"><small>People</small>${stepper("staff", x.id, x.name + " people", 1)}</div><div class="qrow"><small>Hours</small>${stepper("svc", x.id, x.name + " hours", 0)}</div></div>`
+        : stepper("svc", x.id, x.name, 0);
+      return `
+      <div class="svc" data-row="${x.id}"><div class="info">${x.name}<small>${priceText(x, this.s)}</small><small class="incl">Included in your package</small></div>${ctl}</div>`;
+    }).join("");
     box.innerHTML = `<div class="tabs" role="tablist">${tabs}</div>${rows}`;
+  }
+
+  // "Pick a package": the packages of the chosen destination, with their price, minimum group size and contents
+  renderPackages() {
+    const box = this.shadowRoot.querySelector("#pkgBox");
+    if (!box) return;
+    const d = this.s.destination;
+    if (!d) { box.innerHTML = `<p class="note">Choose a destination to see the package prices and what is included.</p>`; return; }
+    const pk = packagesFor(d), keys = Object.keys(pk);
+    if (!keys.length) { box.innerHTML = `<p class="note">Packages for this destination are arranged with our team. You can still build your own below.</p>`; return; }
+    const guests = Math.floor(Number(this.s.guests)) || 0;
+    box.innerHTML = `<div class="pk">` + keys.map((k) => {
+      const p = pk[k], low = guests > 0 && guests < p.min;
+      return `<div class="pkc"><button type="button" class="opt pkg" data-pkg="${k}"${low ? " disabled" : ""}>${p.popular ? '<span class="badge">Popular</span>' : ""}${p.label}<small>${p.tagline}</small><small class="pp">${usd(p.perPerson)} / guest</small><small>${p.min} guests minimum</small></button>
+      ${low ? `<p class="lowg">This package needs at least ${p.min} guests.</p><button type="button" class="cust">Customize Package</button>` : ""}
+      <details class="pinc"><summary>What's included</summary><ul>${p.items.map((t) => `<li>${t}</li>`).join("")}</ul></details></div>`;
+    }).join("") + `</div>`;
   }
 
   hasRank(r) { return this.villasNow().some((v) => this.s.ranks[v.id] === r); }
@@ -1221,16 +1277,25 @@ class TripBuilder extends HTMLElement {
     const $$ = (q) => this.shadowRoot.querySelectorAll(q);
     const s = this.s, isStay = s.mode === "stay";
     this.clampQty();
+    const g0 = Math.floor(Number(s.guests)) || 0;
+    const pkAll = packagesFor(s.destination);
+    if (s.package && (!pkAll[s.package] || (g0 > 0 && g0 < pkAll[s.package].min))) s.package = null; // group too small for this package
     ["#stay", "#pkgs", "#terms", "#ackBox", "#toTerms"].forEach((q) => $(q).classList.toggle("hide", !isStay));
     if (!isStay) s.package = null;
     $$(".mode").forEach((b) => b.classList.toggle("on", b.dataset.mode === s.mode));
     $$(".tier").forEach((b) => b.classList.toggle("on", b.dataset.tier === s.tier));
     $$(".pkg").forEach((b) => b.classList.toggle("on", b.dataset.pkg === s.package));
-    $$(".qty").forEach((q) => (q.querySelector("span").textContent = s.services[q.dataset.svc] || 0));
+    $$(".qty").forEach((q) => (q.querySelector("span").textContent = q.dataset.staff ? (s.staff[q.dataset.staff] || 1) : (s.services[q.dataset.svc] || 0)));
     const svcList = servicesFor(s.destination);
-    const pkgNow = s.package ? PACKAGES[s.package] : null;
-    const covered = new Set(svcList.filter((x) => isCovered(x, pkgNow)).map((x) => x.id));
-    $$(".svc").forEach((r) => r.classList.toggle("inc", covered.has(r.dataset.row)));
+    const pkgNow = s.package && pkAll[s.package] && g0 >= pkAll[s.package].min ? pkAll[s.package] : null;
+    $$(".svc").forEach((r) => {
+      const x = svcList.find((y) => y.id === r.dataset.row);
+      const cov = !!x && isCovered(x, pkgNow), lim = cov ? includedQty(x, pkgNow) : 0;
+      r.classList.toggle("inc", cov);
+      r.classList.toggle("part", !!lim);
+      const t = r.querySelector(".incl");
+      if (t) t.textContent = lim ? `Your package includes ${lim} days. Add extra days below.` : "Included in your package";
+    });
     ["regular", "location"].forEach((k) => {
       const n = svcList.filter((x) => x.tab === k && (s.services[x.id] || 0) > 0).length;
       const el = $(`[data-cnt="${k}"]`);
@@ -1270,7 +1335,7 @@ class TripBuilder extends HTMLElement {
       standard: base + " The balance is due 30 days before arrival.",
       "within-window": base + " Because your trip starts within 30 days, the payment required will be stated before final confirmation.",
       "services-only": "Services-only bookings are paid in full at checkout.",
-    }[c.policy] + " Your total includes the Guys Paradise planning and service fee." + (isStay && c.priceTbd ? " The price of your first-choice villa is still being confirmed, so accommodation shows the lowest price in this tier." : isStay && c.estimated ? " Accommodation shows the lowest villa price in this tier until you choose a first-choice villa." : "");
+    }[c.policy] + " Your total includes the Guys Paradise planning and service fee" + (c.policy !== "services-only" && !RULES.depositIncludesFee ? ", which is collected with your final balance." : ".") + (isStay && c.priceTbd ? " The price of your first-choice villa is still being confirmed, so accommodation shows the lowest price in this tier." : isStay && c.estimated ? " Accommodation shows the lowest villa price in this tier until you choose a first-choice villa." : "");
 
     if (!this._busy) $("#go").textContent = isStay ? "Pay Provisional Deposit" : "Continue to payment";
 

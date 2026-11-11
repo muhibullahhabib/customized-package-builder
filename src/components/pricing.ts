@@ -14,30 +14,29 @@ export const TIER_LABELS = { "4-6": "4–6 bedrooms", "7-9": "7–9 bedrooms", "
 // ------------------------------------------------------------------------------------------------
 // SERVICES AND TOURS, PER LOCATION
 //
-// basis:  "day"    = per day                     "person" = per guest
-//         "flat"   = one fee per booking         "trip"   = per round trip (one vehicle, up to 10 guests)
-//         "unit"   = each (models, DJ, ...)      "hour"   = per hour
-//         "group"  = per group of up to 10 guests
-// tab:    "regular"  = services offered everywhere     "location" = tours / experiences of this place only
-// group:  used by the packages (a package covers every service of the groups it includes)
+// basis:  "day"      = per day                      "person"   = per guest
+//         "flat"     = one fee per booking          "trip"     = per round trip (one vehicle, up to 10 guests)
+//         "unit"     = per event (DJ, ...)          "hour"     = per hour
+//         "group"    = per group of up to 10        "staffhour"= per person per hour (the guest picks the number of people AND the hours)
+// tab:    "regular"  = services offered everywhere  "location" = tours / experiences of this place only
+// group:  used by the packages (a package covers every service of the groups it lists)
 // tiers:  price depends on the group size, e.g. the chef. The first tier whose "upTo" fits the guest count wins.
 // extra:  flat fee plus a price per guest above a number of guests (catamarans)
 // freeWithStay: free when a villa / accommodation is booked as well (the host)
-// pkg:    true = this is the boat that a Platinum package includes in this location
 // A service with price: null is hidden until the client sends its price.
 // ------------------------------------------------------------------------------------------------
 const regular = (o) => [
-  { id: "chef", name: "Chef", group: "chef", basis: "day", tab: "regular",
+  { id: "chef", name: "Chef", group: "chef", basis: "day", tab: "regular", note: "3 meals per day",
     tiers: [{ upTo: 10, price: o.chef[0] }, { price: o.chef[1], note: "with assistant" }] },
   { id: "transfer", name: "Airport transfer", group: "transfer", basis: "trip", tab: "regular", price: o.transfer, note: "up to 10 guests" },
-  { id: "chauffeur", name: "Chauffeur (15-passenger van)", group: "transport", basis: "day", tab: "regular", price: o.chauffeur },
+  { id: "chauffeur", name: "Chauffeur (15-passenger van)", group: "transport", basis: "day", tab: "regular", price: o.chauffeur, note: "8 hours per day" },
   { id: "massage", name: "Massage", group: "massage", basis: "person", tab: "regular", price: o.massage },
   { id: "host", name: "Host", group: "host", basis: "flat", tab: "regular", price: 100, freeWithStay: true },
-  { id: "sushi", name: "Sushi model", group: "sushi", basis: "unit", tab: "regular", price: 250 },
-  { id: "welcome", name: "Welcome model", group: "welcome", basis: "unit", tab: "regular", price: o.welcome },
-  { id: "dj", name: "DJ / Bartender", group: "dj", basis: "unit", tab: "regular", price: o.dj },
-  { id: "lingerie", name: "Lingerie waitress", group: "lingerie", basis: "hour", tab: "regular", price: 200 },
-  { id: "vip", name: "VIP nightclub", group: "vip", basis: "group", tab: "regular", price: o.vip, note: "up to 10 people, 2 bottles" },
+  { id: "sushi", name: "Sushi model", group: "sushi", basis: "hour", tab: "regular", price: 250 },
+  { id: "welcome", name: "Welcome model", group: "welcome", basis: "hour", tab: "regular", price: o.welcome },
+  { id: "dj", name: "DJ / Bartender", group: "dj", basis: "unit", tab: "regular", price: o.dj, note: "4 hours total" },
+  { id: "lingerie", name: "Lingerie waitress", group: "lingerie", basis: "staffhour", tab: "regular", price: 200 },
+  { id: "vip", name: "VIP nightclub", group: "vip", basis: "group", tab: "regular", price: o.vip, note: `up to 10 guests, ${o.bottles} bottles` },
 ];
 
 const loc = (id, name, basis, price, more = {}) => ({ id, name, group: more.group || id, basis, price, tab: "location", ...more });
@@ -46,8 +45,8 @@ export const REGIONS = {
   medellin: {
     label: "Medellín",
     services: [
-      ...regular({ chef: [225, 275], transfer: 225, chauffeur: 250, massage: 79, welcome: 150, dj: 550, vip: 750 }),
-      loc("guatape", "Guatape boat party (includes transportation)", "flat", 1000, { group: "yacht", pkg: true }),
+      ...regular({ chef: [225, 275], transfer: 225, chauffeur: 250, massage: 79, welcome: 150, dj: 550, vip: 750, bottles: 2 }),
+      loc("guatape", "Guatape pontoon boat party", "flat", 1000, { group: "yacht", note: "4 hours, includes city tour and transportation" }),
       loc("atv", "ATV", "person", 130),
       loc("comuna", "Comuna tour", "person", 70),
       loc("paintball", "Paintball experience", "person", 125),
@@ -57,7 +56,7 @@ export const REGIONS = {
   "dominican-republic": {
     label: "Dominican Republic",
     services: [
-      ...regular({ chef: [225, 275], transfer: 195, chauffeur: 295, massage: 79, welcome: 150, dj: 550, vip: 750 }),
+      ...regular({ chef: [225, 275], transfer: 195, chauffeur: 295, massage: 79, welcome: 150, dj: 550, vip: 750, bottles: 2 }),
       loc("atv", "ATV", "person", 90),
       loc("zip", "Zipline", "person", 90),
       loc("hike", "Mini hike and waterfall tour", "person", 90),
@@ -66,8 +65,9 @@ export const REGIONS = {
   jaco: {
     label: "Jaco",
     services: [
-      ...regular({ chef: [225, 325], transfer: 395, chauffeur: 295, massage: 85, welcome: 200, dj: 550, vip: 750 }),
-      loc("yacht-party", "Yacht party (up to 15 people)", "flat", 2050, { group: "yacht", pkg: true }),
+      ...regular({ chef: [225, 325], transfer: 395, chauffeur: 295, massage: 85, welcome: 200, dj: 550, vip: 750, bottles: 2 }),
+      // ⚠️ the 4 hours come from the Gold package wording; confirm it is the same boat as this one
+      loc("yacht-party", "Yacht party (up to 15 people)", "flat", 2050, { group: "yacht", note: "half day, 4 hours" }),
       loc("atv", "ATV", "person", 109),
       loc("zip", "Zipline tour", "person", 85),
       loc("manuel-antonio", "Manuel Antonio and monkey tour", "person", 120),
@@ -77,14 +77,13 @@ export const REGIONS = {
   cartagena: {
     label: "Cartagena",
     services: [
-      // chauffeur and VIP nightclub: price not received yet, so they stay hidden
-      ...regular({ chef: [225, 275], transfer: 125, chauffeur: null, massage: 79, welcome: 150, dj: 425, vip: null }),
-      loc("cat-51", "Catamaran 51 ft (up to 15 people)", "flat", 3195, { group: "yacht", extra: { after: 15, perPerson: 30 } }),
-      // ⚠️ confirm with the client which boat the Platinum package includes in Cartagena
-      loc("cat-47", "Catamaran 47 ft (up to 15 people)", "flat", 2995, { group: "yacht", pkg: true, extra: { after: 15, perPerson: 30 } }),
+      ...regular({ chef: [225, 275], transfer: 125, chauffeur: 285, massage: 79, welcome: 150, dj: 425, vip: 995, bottles: 3 }),
+      loc("cat-51", "Catamaran 51 ft (up to 15 people)", "flat", 3195, { group: "yacht", extra: { after: 15, perPerson: 30 }, note: "full day to Rosario Islands / Cholon, up to 35 guests" }),
+      loc("cat-47", "Catamaran 47 ft (up to 15 people)", "flat", 2995, { group: "yacht", extra: { after: 15, perPerson: 30 } }),
       loc("yacht-70", "Yacht 70 ft", "flat", 3750, { group: "yacht" }),
       loc("yacht-82", "Yacht 82 ft", "flat", 6000, { group: "yacht" }),
-      loc("speedboat", "Speed boats", "flat", 1195, { group: "yacht" }),
+      // ⚠️ the "full day, Rosario Islands, up to 20 guests" comes from the Gold package wording; confirm it is the same boat
+      loc("speedboat", "Speed boats", "flat", 1195, { group: "yacht", note: "full-day Rosario Islands excursion, up to 20 guests" }),
       loc("atv", "ATV", "person", 139),
       loc("zip", "Zipline", "person", 139),
       loc("rum-cigar", "Rum and cigar experience", "person", 150),
@@ -124,17 +123,73 @@ export function servicesFor(destinationId) {
   return r ? r.services.filter(hasPrice) : [];
 }
 
-// Packages: price per guest + which service GROUPS are included (confirm package contents with the client).
-// A package is charged once. The services inside it are never charged again, and the planning fee
-// is calculated once on the package price.
-export const PACKAGES = {
-  silver: { label: "Silver", tagline: "Core trip essentials", perPerson: 250, includes: ["chef"] },
-  gold: { label: "Gold", tagline: "More included experiences", perPerson: 450, popular: true, includes: ["chef", "transport", "massage"] },
-  platinum: { label: "Platinum", tagline: "Premium trip selection", perPerson: 800, includes: ["chef", "transport", "massage", "atv", "yacht"] },
+// ------------------------------------------------------------------------------------------------
+// PACKAGES, PER LOCATION (final rates from the client)
+//
+// perPerson: price per guest. min: minimum group size (smaller groups are sent to "Customize Package").
+// covers:    service GROUPS the package already pays for (those are not charged again, and carry no extra fee).
+// boat:      the id of the boat service the package includes (only that boat is covered; null = no priced boat in the list).
+// limits:    included amount of a day-based service, e.g. chef 4 days. Extra days are charged normally.
+// items:     the wording shown to the guest ("What's included"). Items without a matching service (bartender,
+//            security guard, bottle of liquor) are shown only.
+// The planning fee is charged once on the package price.
+// ------------------------------------------------------------------------------------------------
+const PKG_BASE = {
+  silver: { label: "Silver", tagline: "Core trip essentials", min: 6 },
+  gold: { label: "Gold", tagline: "More included experiences", min: 10, popular: true },
+  platinum: { label: "Platinum", tagline: "Premium trip selection", min: 10 },
 };
 
-// Is this service already paid for by the package? (a package boat only covers the boat marked pkg)
-export const isCovered = (svc, pkg) => !!pkg && pkg.includes.includes(svc.group) && (svc.group !== "yacht" || !!svc.pkg);
+const PKG_BY_REGION = {
+  medellin: {
+    silver: { perPerson: 249, covers: ["atv", "transfer", "massage", "host"],
+      items: ["ATV adventure", "Bartender service", "Round-trip airport transportation", "One massage per guest", "FREE hosting"] },
+    gold: { perPerson: 379, covers: ["yacht", "atv", "dj", "transfer", "massage", "host"], boat: "guatape",
+      items: ["Guatape pontoon boat party: 4 hours, including city tour and transportation", "ATV adventure", "DJ service", "Bartender service", "Round-trip airport transportation", "One massage per guest", "FREE hosting"] },
+    platinum: { perPerson: 629, covers: ["chef", "transport", "yacht", "atv", "dj", "transfer", "massage", "host"], boat: "guatape", limits: { chef: 4, transport: 4 },
+      items: ["Chef service: 4 days, 3 meals per day", "Chauffeur: 4 days, 8 hours per day", "Guatape pontoon boat party: 4 hours, including city tour and transportation", "ATV adventure", "DJ & bartender service", "Security guard: 4 days", "Round-trip airport transportation", "One massage per guest", "FREE hosting"] },
+  },
+  cartagena: {
+    silver: { perPerson: 249, covers: ["atv", "transfer", "massage", "host"],
+      items: ["ATV adventure", "Bartender service", "Round-trip airport transportation", "One massage per guest", "FREE hosting"] },
+    gold: { perPerson: 379, covers: ["yacht", "atv", "dj", "transfer", "massage", "host"], boat: "speedboat",
+      items: ["Full-day speedboat excursion to Rosario Islands: accommodates up to 20 guests", "ATV adventure", "DJ service", "Bartender service", "Round-trip airport transportation", "One massage per guest", "FREE hosting"] },
+    platinum: { perPerson: 835, covers: ["chef", "transport", "yacht", "atv", "dj", "transfer", "massage", "host"], boat: "cat-51", limits: { chef: 4, transport: 4 },
+      items: ["Chef service: 4 days, 3 meals per day", "Chauffeur: 4 days, 8 hours per day", "Full-day catamaran excursion to Rosario Islands / Cholon: accommodates up to 35 guests (51 ft)", "ATV adventure", "DJ & bartender service: 4 hours", "Security guard: 4 days", "Round-trip airport transportation", "One massage per guest", "FREE hosting"] },
+  },
+  jaco: {
+    silver: { perPerson: 349, covers: ["atv", "zip", "transfer", "massage", "host"],
+      items: ["ATV adventure", "Zipline adventure", "Round-trip airport transportation", "One FREE bottle of liquor", "One massage per guest", "FREE hosting"] },
+    gold: { perPerson: 549, covers: ["yacht", "atv", "zip", "dj", "transfer", "massage", "host"], boat: "yacht-party",
+      items: ["Half-day yacht cruise: 4 hours", "ATV adventure", "Zipline adventure", "DJ service", "Bartender service", "Round-trip airport transportation", "One FREE bottle of liquor", "One massage per guest", "FREE hosting"] },
+    platinum: { perPerson: 799, covers: ["chef", "transport", "yacht", "atv", "zip", "dj", "transfer", "massage", "host"], boat: "yacht-party", limits: { chef: 4, transport: 4 },
+      items: ["Chef service: 4 days, 3 meals per day", "Chauffeur: 4 days, 8 hours per day", "Half-day yacht cruise: 4 hours, transportation included", "ATV & zipline adventure", "DJ & bartender service: 4 hours", "Security guard: 4 days", "Round-trip airport transportation", "One FREE bottle of liquor", "One massage per guest", "FREE hosting"] },
+  },
+  // Sosúa. The same packages are used for Cap Cana / Casa de Campo (⚠️ confirm with the client).
+  // The boat (yacht cruise or party catamaran) has no price in the DR service list, so it is shown but not counted toward the deposit.
+  "dominican-republic": {
+    silver: { perPerson: 299, covers: ["atv", "zip", "transfer", "massage", "host"],
+      items: ["ATV adventure", "Zipline adventure", "Round-trip airport transportation", "One FREE bottle of liquor", "One 60-minute massage per guest", "FREE hosting"] },
+    gold: { perPerson: 499, covers: ["atv", "zip", "dj", "transfer", "massage", "host"], boat: null,
+      items: ["Half-day yacht cruise or party catamaran: food and transportation included", "ATV adventure", "Zipline adventure", "DJ service: 4 hours", "Bartender service: 4 hours", "Round-trip airport transportation", "One FREE bottle of liquor", "One massage per guest", "FREE hosting"] },
+    platinum: { perPerson: 749, covers: ["chef", "transport", "atv", "zip", "dj", "transfer", "massage", "host"], boat: null, limits: { chef: 4, transport: 4 },
+      items: ["Chef service: 4 days, 3 meals per day", "Chauffeur: 4 days, 8 hours per day", "Half-day yacht cruise or party catamaran: food and transportation included", "ATV & zipline adventure", "DJ & bartender service: 4 hours", "Security guard: 4 nights", "Round-trip airport transportation", "One FREE bottle of liquor", "One massage per guest", "FREE hosting"] },
+  },
+};
+
+// The packages of a destination: { silver: {label, tagline, min, perPerson, covers, boat, limits, items}, gold: ..., platinum: ... }
+export function packagesFor(destinationId) {
+  const r = PKG_BY_REGION[regionFor(destinationId)];
+  if (!r) return {};
+  const out = {};
+  for (const k of Object.keys(PKG_BASE)) out[k] = { key: k, boat: null, limits: {}, ...PKG_BASE[k], ...r[k] };
+  return out;
+}
+
+// Is this service already paid for by the package? (a package boat only covers the boat it names)
+export const isCovered = (svc, pkg) => !!pkg && pkg.covers.includes(svc.group) && (svc.group !== "yacht" || svc.id === pkg.boat);
+// How many days of a day-based service the package includes (0 = fully included, or not included at all)
+export const includedQty = (svc, pkg) => (isCovered(svc, pkg) ? (pkg.limits && pkg.limits[svc.group]) || 0 : 0);
 
 export const RULES = {
   // The estimate is based on the guest's FIRST-CHOICE villa (per the client's "Before You Pay" wording).
@@ -146,11 +201,10 @@ export const RULES = {
   // and refundable security deposits are NOT part of the subtotal (the builder has none of them).
   serviceFeePct: 0.135,
 
-  depositPct: 0.5,          // provisional deposit = 50% of accommodation + 50% of yacht
-  // ⚠️ To confirm with the client: true  = the planning fee on the accommodation and yacht is split the same way
-  //                                         (deposit = 50% of (accommodation + yacht) including its fee)
-  //                               false = the whole fee is paid with the balance
-  depositIncludesFee: true,
+  depositPct: 0.5,          // provisional deposit = 50% of accommodation + 50% of the boat
+  // Client decision: the whole planning fee is collected with the final balance, so the deposit is
+  // 50% of accommodation + 50% of the boat WITHOUT the fee.
+  depositIncludesFee: false,
   balanceDueDaysBefore: 30, // balance is due 30 days before check-in
   // ⚠️ Not decided by the client yet; these are the working defaults:
   servicesOnlyPayFullNow: true,  // services-only bookings (no villa) are paid 100% now
@@ -184,13 +238,15 @@ export function unitPrice(svc, state) {
 }
 
 // Quantity limits (used by the widget buttons and again by the server)
+export const MAX_STAFF = 10; // most waitresses that can be booked at once
+
 export function maxQty(svc, state) {
   const guests = guestCount(state);
   const nights = nightsBetween(state.checkIn, state.checkOut);
   if (svc.basis === "flat") return 1;
   if (svc.basis === "person") return guests || 99;
   if (svc.basis === "day") return nights ? nights + 1 : 99;
-  if (svc.basis === "hour") return 24;
+  if (svc.basis === "hour" || svc.basis === "staffhour") return 24;
   return 10; // trip, unit, group
 }
 export function defaultQty(svc, state) {
@@ -202,7 +258,7 @@ export function defaultQty(svc, state) {
   return 1;
 }
 
-const BASIS_TEXT = { day: "Per day", person: "Per person", flat: "Flat fee per booking", trip: "Per round trip", unit: "Each", hour: "Per hour", group: "Per group" };
+const BASIS_TEXT = { day: "Per day", person: "Per person", flat: "Flat fee per booking", trip: "Per round trip", unit: "Per event", hour: "Per hour", staffhour: "Per person, per hour", group: "Flat group price" };
 
 // The price line shown under each service name
 export function priceText(svc, state) {
@@ -235,6 +291,7 @@ export function priceText(svc, state) {
  *   ranks: { villaId: "1" | "2" | "3" },   // 3rd choice is optional
  *   package: "silver" | "gold" | "platinum" | null,
  *   services: { chef: qty, atv: qty, ... }   // qty > 0 means selected; ids are those of the destination's price list
+ *   staff: { lingerie: 2 }                  // number of people for "staffhour" services (default 1)
  * }
  *
  * Returns the itemized lines, the subtotal, the planning fee, the total, and the deposit / balance.
@@ -270,28 +327,39 @@ export function calculate(state) {
     }
   }
 
-  const pkg = state.package ? PACKAGES[state.package] : null;
-  if (pkg && guests > 0) {
+  // the package of this destination; groups below its minimum size get no package price (they customize instead)
+  const pkgs = packagesFor(state.destination);
+  let pkg = state.package ? pkgs[state.package] || null : null;
+  if (pkg && guests < pkg.min) pkg = null;
+  if (pkg) {
     lines.push({ label: `${pkg.label} package × ${guests} guest${guests > 1 ? "s" : ""}`, amount: pkg.perPerson * guests });
   }
 
   // services of the chosen destination; those included in the package are not charged twice
-  // (so the fee is not charged on them twice either)
+  // (so the fee is not charged on them twice either). A package that includes only some days (chef 4 days)
+  // charges the extra days the guest adds.
   const list = servicesFor(state.destination);
   for (const s of list) {
+    const covered = isCovered(s, pkg);
+    const limited = includedQty(s, pkg) > 0;
+    if (covered && !limited) continue;
     const qty = Math.min(Math.floor(Number(state.services?.[s.id])) || 0, maxQty(s, state));
-    if (qty <= 0 || isCovered(s, pkg)) continue;
+    if (qty <= 0) continue;
     const unit = unitPrice(s, state);
-    const amount = money(unit * qty);
-    const n = (w) => `${qty} ${w}${qty > 1 ? "s" : ""}`;
-    const what = { day: n("day"), person: n("guest"), flat: "flat fee", trip: n("round trip"), unit: `× ${qty}`, hour: n("hour"), group: n("group") }[s.basis];
+    const staff = s.basis === "staffhour" ? Math.min(Math.max(Math.floor(Number(state.staff?.[s.id])) || 1, 1), MAX_STAFF) : 1;
+    const amount = money(unit * qty * staff);
+    const n = (w) => `${qty} ${covered ? "extra " : ""}${w}${qty > 1 ? "s" : ""}`;
+    const what = {
+      day: n("day"), person: n("guest"), flat: "flat fee", trip: n("round trip"), unit: `× ${qty}`, hour: n("hour"), group: n("group"),
+      staffhour: `${staff} ${staff > 1 ? "people" : "person"} × ${qty} hour${qty > 1 ? "s" : ""}`,
+    }[s.basis];
     const label = unit === 0 ? `${s.name} · included with your stay` : `${s.name} · ${what}`;
     lines.push({ label, amount });
     if (s.group === "yacht") yacht += amount;
   }
-  // a boat included in a package also counts toward the deposit
-  if (pkg && pkg.includes.includes("yacht")) {
-    const boat = list.find((s) => s.group === "yacht" && s.pkg);
+  // the boat included in a package also counts toward the deposit
+  if (pkg && pkg.boat) {
+    const boat = list.find((s) => s.id === pkg.boat);
     if (boat) yacht += unitPrice(boat, state);
   }
 
@@ -316,7 +384,7 @@ export function calculate(state) {
   }
 
   return {
-    nights, lines, subtotal, serviceFee, serviceFeePct: RULES.serviceFeePct, total, estimated, priceTbd, firstChoice, deposit, policy,
+    package: pkg ? pkg.key : null, nights, lines, subtotal, serviceFee, serviceFeePct: RULES.serviceFeePct, total, estimated, priceTbd, firstChoice, deposit, policy,
     balance: money(total - deposit),
     balanceDueDate: policy === "standard" && dueDate ? dueDate.toISOString().slice(0, 10) : null,
   };

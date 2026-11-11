@@ -28,7 +28,6 @@ export async function OPTIONS() {
   return new Response(null, { status: 204, headers: cors });
 }
 
-// GET /api/checkout: ব্রাউজারে খুললে দেখা যায় সার্ভারে কোন ভার্সন চলছে
 export async function GET() {
   return json({ version: "checkout-v3", debug: DEBUG });
 }
@@ -106,7 +105,9 @@ export async function POST({ request }) {
     // Readable services text and a balance-due value that is never empty
     const serviceText =
       servicesFor(body.destination).filter((s) => Number(body.services?.[s.id]) > 0)
-        .map((s) => s.name + " x" + body.services[s.id])
+        .map((s) => s.basis === "staffhour"
+          ? s.name + " x" + (Number(body.staff?.[s.id]) || 1) + " people, " + body.services[s.id] + " h"
+          : s.name + " x" + body.services[s.id])
         .join(", ") || "None";
     const balanceDueText =
       quote.balanceDueDate ||
@@ -124,7 +125,7 @@ export async function POST({ request }) {
       villa_2nd: isStay ? villaName("2") : "",
       villa_3rd: isStay ? villaName("3") : "",
       villa_image: isStay ? villaThumb("1") : "",
-      package: body.package || "",
+      package: quote.package || "", // the package that was really charged (a group below the minimum gets none)
       services: serviceText.slice(0, 500),
       subtotal: String(quote.subtotal),
       service_fee: String(quote.serviceFee),
@@ -147,7 +148,7 @@ export async function POST({ request }) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: body.contact.email,
-      customer_creation: "always", // বাকি টাকার invoice এর জন্য Stripe customer লাগে
+      customer_creation: "always", 
       line_items: [
         {
           quantity: 1,
@@ -184,7 +185,6 @@ export async function POST({ request }) {
     return json({ checkoutUrl: session.url, orderError, orderMissing });
   } catch (e) {
     console.error(e);
-    // DEBUG = true হলে আসল error দেখায়। সবকিছু ঠিক হলে false করে দিও।
     return json({
       error: DEBUG
         ? "DEBUG [" + step + "]: " + String((e && e.message) || e)
